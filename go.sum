@@ -1,5 +1,5 @@
-fyne.io/fyne v1.2.5-0.20200515223430-3e1864e1922a h1:wxG43kIGh8W5PsNlE0WVMjeWtluIIJqDW6PtetM48Nk=
-fyne.io/fyne v1.2.5-0.20200515223430-3e1864e1922a/go.mod h1:aAq4WmIwSqlS2K8Fct81ENxCWzJCIOWk8ndLi+/g88o=
+fyne.io/fyne v1.2.5-0.20200516181602-fa290ff1e7ed h1:Rcp9GnqhOwWaEO/FWqikJw3HaIbbWf9h6n/1x5PbMZw=
+fyne.io/fyne v1.2.5-0.20200516181602-fa290ff1e7ed/go.mod h1:aAq4WmIwSqlS2K8Fct81ENxCWzJCIOWk8ndLi+/g88o=
 github.com/AletheiaWareLLC/aliasgo v0.0.0-20200510180614-c8583f09cd4d h1:bNTbZ4WW39jntC1PRNUuMSzNSbZ+b3vh2NqDh0GIOXA=
 github.com/AletheiaWareLLC/aliasgo v0.0.0-20200510180614-c8583f09cd4d/go.mod h1:Ruk4wvz4IbB70LfLg8VO+CDtXEN4Gf/jqAyankJGGZk=
 github.com/AletheiaWareLLC/bcclientgo v0.0.0-20200516182638-1786ca7b90f0 h1:MDKoxo4R4KVdbFweGe+ZJHsFqt34w83L0MBTY7rdc0Y=
