@@ -27,7 +27,7 @@ import (
 	"testing"
 )
 
-func Test_Account(t *testing.T) {
+func Test_UI(t *testing.T) {
 	a := test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
