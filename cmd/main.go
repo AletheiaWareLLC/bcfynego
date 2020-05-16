@@ -22,7 +22,7 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"github.com/AletheiaWareLLC/bcclientgo"
-	"github.com/AletheiaWareLLC/bcfynego/ui"
+	"github.com/AletheiaWareLLC/bcfynego"
 	"github.com/AletheiaWareLLC/bcgo"
 	"log"
 )
@@ -63,7 +63,7 @@ func main() {
 	w.SetMaster()
 
 	// Create BC client
-	c := &ui.Client{
+	c := &bcfynego.Client{
 		Client: bcclientgo.Client{
 			Root:    rootDir,
 			Cache:   cache,
