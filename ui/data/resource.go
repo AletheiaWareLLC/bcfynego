@@ -36,15 +36,13 @@ func NewThemedResource(source fyne.Resource) *ThemedResource {
 }
 
 func (res *ThemedResource) Name() string {
-	// TODO log.Println("ThemedResource.Name")
 	return res.source.Name()
 }
 
 func (res *ThemedResource) Content() []byte {
-	// TODO log.Println("ThemedResource.Content")
 	background := colorToHexString(fyne.CurrentApp().Settings().Theme().BackgroundColor())
 	icon := colorToHexString(fyne.CurrentApp().Settings().Theme().IconColor())
-	primary := "#0fffff" //colorToHexString(fyne.CurrentApp().Settings().Theme().PrimaryColor())
+	primary := "#00ffff" //colorToHexString(fyne.CurrentApp().Settings().Theme().PrimaryColor())
 	textsize := fyne.CurrentApp().Settings().Theme().TextSize()
 	svg := string(res.source.Content())
 	svg = strings.ReplaceAll(svg, "background", background)
@@ -57,7 +55,7 @@ func (res *ThemedResource) Content() []byte {
 }
 
 func colorToHexString(color color.Color) string {
-	r, g, b, a := color.RGBA()
-	cBytes := []byte{byte(r), byte(g), byte(b), byte(a)}
+	r, g, b, _ := color.RGBA()
+	cBytes := []byte{byte(r), byte(g), byte(b)}
 	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes))
 }
