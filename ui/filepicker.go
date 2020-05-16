@@ -27,19 +27,19 @@ import (
 	"log"
 )
 
-var _ desktop.Cursorable = (*filePicker)(nil)
-var _ fyne.Tappable = (*filePicker)(nil)
-var _ fyne.Widget = (*filePicker)(nil)
+var _ desktop.Cursorable = (*FilePicker)(nil)
+var _ fyne.Tappable = (*FilePicker)(nil)
+var _ fyne.Widget = (*FilePicker)(nil)
 
-type filePicker struct {
+type FilePicker struct {
 	widget.BaseWidget
 	window fyne.Window
 	icon   *canvas.Image
 	entry  *widget.Entry
 }
 
-func newFilePicker(w fyne.Window, e *widget.Entry) *filePicker {
-	pr := &filePicker{
+func NewFilePicker(w fyne.Window, e *widget.Entry) *FilePicker {
+	pr := &FilePicker{
 		window: w,
 		icon:   canvas.NewImageFromResource(theme.FolderIcon()),
 		entry:  e,
@@ -48,19 +48,19 @@ func newFilePicker(w fyne.Window, e *widget.Entry) *filePicker {
 	return pr
 }
 
-func (r *filePicker) CreateRenderer() fyne.WidgetRenderer {
+func (r *FilePicker) CreateRenderer() fyne.WidgetRenderer {
 	return &filePickerRenderer{
 		icon:  r.icon,
 		entry: r.entry,
 	}
 }
 
-func (r *filePicker) Cursor() desktop.Cursor {
+func (r *FilePicker) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
-func (r *filePicker) Tapped(*fyne.PointEvent) {
-	log.Println("filePicker.Tapped")
+func (r *FilePicker) Tapped(*fyne.PointEvent) {
+	log.Println("FilePicker.Tapped")
 	// Show open file dialog
 	dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
 		if err != nil {
