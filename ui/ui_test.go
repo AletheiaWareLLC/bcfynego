@@ -34,17 +34,17 @@ func Test_UI(t *testing.T) {
 	for name, tt := range map[string]struct {
 		builder func(fyne.Window) fyne.CanvasObject
 	}{
-		"account_import_key": {
+		"account/import_key": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				return account.NewImportKey().CanvasObject()
 			},
 		},
-		"account_sign_in": {
+		"account/sign_in": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				return account.NewSignIn().CanvasObject()
 			},
 		},
-		"account_sign_up": {
+		"account/sign_up": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				return account.NewSignUp().CanvasObject()
 			},
@@ -55,7 +55,7 @@ func Test_UI(t *testing.T) {
 					Resource: data.NewThemedResource(data.Logo),
 					FillMode: canvas.ImageFillOriginal,
 				}
-				img.SetMinSize(fyne.NewSize(480, 240))
+				img.SetMinSize(fyne.NewSize(26, 48))
 				return img
 			},
 		},
