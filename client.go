@@ -18,6 +18,7 @@ package bcfynego
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"fyne.io/fyne"
@@ -200,5 +201,11 @@ func (c *Client) ShowError(err error) {
 func (c *Client) ShowNode() {
 	log.Println("ShowNode")
 	node := c.GetNode()
-	log.Println("Alias:", node.Alias)
+	info := fmt.Sprintf("Alias: %s\n", node.Alias)
+	publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
+	if err == nil {
+		info = fmt.Sprintf("%sPublicKey: %s\n", info, base64.RawURLEncoding.EncodeToString(publicKeyBytes))
+	}
+	c.Dialog = dialog.NewInformation("Node", info, c.Window)
+	c.Dialog.Show()
 }
