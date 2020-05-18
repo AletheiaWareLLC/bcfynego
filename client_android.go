@@ -28,12 +28,10 @@ func (c *Client) GetRoot() (string, error) {
 		log.Println("bcfynego.Client_android.GetRoot()")
 		log.Println("*******************init*******************")
 		log.Println(os.Environ())
-		_, ok := os.LookupEnv("ROOT_DIRECTORY")
-		if !ok {
+		if _, ok := os.LookupEnv("ROOT_DIRECTORY"); !ok {
 			os.Setenv("ROOT_DIRECTORY", os.Getenv("FILESDIR"))
 		}
-		_, ok := os.LookupEnv("CACHE_DIRECTORY")
-		if !ok {
+		if _, ok := os.LookupEnv("CACHE_DIRECTORY"); !ok {
 			os.Setenv("CACHE_DIRECTORY", os.Getenv("TMPDIR"))
 		}
 	}
