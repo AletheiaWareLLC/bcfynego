@@ -32,6 +32,10 @@ func (c *Client) GetRoot() (string, error) {
 		if !ok {
 			os.Setenv("ROOT_DIRECTORY", os.Getenv("FILESDIR"))
 		}
+		_, ok := os.LookupEnv("CACHE_DIRECTORY")
+		if !ok {
+			os.Setenv("CACHE_DIRECTORY", os.Getenv("TMPDIR"))
+		}
 	}
 	return c.Client.GetRoot()
 }

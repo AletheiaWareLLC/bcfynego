@@ -32,6 +32,13 @@ func (c *Client) GetRoot() (string, error) {
 				os.Setenv("ROOT_DIRECTORY") = homeDir
 			}
 		}
+		_, ok := os.LookupEnv("CACHE_DIRECTORY")
+		if !ok {
+			cacheDir, err := os.UserCacheDir()
+			if err == nil {
+				os.Setenv("CACHE_DIRECTORY") = cacheDir
+			}
+		}
 	}
 	return c.Client.GetRoot()
 }
