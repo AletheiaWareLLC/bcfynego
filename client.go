@@ -38,15 +38,19 @@ import (
 
 type Client struct {
 	bcclientgo.Client
-	Node   *bcgo.Node
 	App    fyne.App
 	Window fyne.Window
 	Dialog dialog.Dialog
 }
 
 func (c *Client) ExistingNode(alias string, password []byte, callback func(*bcgo.Node)) {
+	rootDir, err := c.GetRoot()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
 	// Get key store
-	keystore, err := bcgo.GetKeyDirectory(c.Root)
+	keystore, err := bcgo.GetKeyDirectory(rootDir)
 	if err != nil {
 		c.ShowError(err)
 		return
@@ -57,12 +61,22 @@ func (c *Client) ExistingNode(alias string, password []byte, callback func(*bcgo
 		c.ShowError(err)
 		return
 	}
+	cache, err := c.GetCache()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
+	network, err := c.GetNetwork()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
 	// Create node
 	node := &bcgo.Node{
 		Alias:    alias,
 		Key:      key,
-		Cache:    c.Cache,
-		Network:  c.Network,
+		Cache:    cache,
+		Network:  network,
 		Channels: make(map[string]*bcgo.Channel),
 	}
 
@@ -70,14 +84,14 @@ func (c *Client) ExistingNode(alias string, password []byte, callback func(*bcgo
 }
 
 func (c *Client) GetNode() *bcgo.Node {
-	if c.Node == nil {
+	if c.Client.Node == nil {
 		nc := make(chan *bcgo.Node, 1)
 		go c.ShowAccessDialog(func(n *bcgo.Node) {
 			nc <- n
 		})
-		c.Node = <-nc
+		c.Client.Node = <-nc
 	}
-	return c.Node
+	return c.Client.Node
 }
 
 func (c *Client) GetLogo() fyne.CanvasObject {
@@ -94,8 +108,13 @@ func (c *Client) NewNode(alias string, password []byte, callback func(*bcgo.Node
 	defer progress.Hide()
 	listener := &ui.ProgressMiningListener{Func: progress.SetValue}
 
+	rootDir, err := c.GetRoot()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
 	// Get key store
-	keystore, err := bcgo.GetKeyDirectory(c.Root)
+	keystore, err := bcgo.GetKeyDirectory(rootDir)
 	if err != nil {
 		c.ShowError(err)
 		return
@@ -106,12 +125,22 @@ func (c *Client) NewNode(alias string, password []byte, callback func(*bcgo.Node
 		c.ShowError(err)
 		return
 	}
+	cache, err := c.GetCache()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
+	network, err := c.GetNetwork()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
 	// Create node
 	node := &bcgo.Node{
 		Alias:    alias,
 		Key:      key,
-		Cache:    c.Cache,
-		Network:  c.Network,
+		Cache:    cache,
+		Network:  network,
 		Channels: make(map[string]*bcgo.Channel),
 	}
 

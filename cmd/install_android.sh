@@ -21,12 +21,9 @@ set -x
 go fmt $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
 go vet $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
 go test $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
-mkdir -p fyne-cross/logs
-(fyne-cross android -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC_unaligned ./cmd/ >./fyne-cross/logs/android 2>&1 && cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/fyne-cross/dist/android && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk) &
-fyne-cross darwin -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC ./cmd/ >./fyne-cross/logs/darwin 2>&1 &
-fyne-cross linux -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC ./cmd/ >./fyne-cross/logs/linux 2>&1 &
-#fyne-cross windows -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC ./cmd/ >./fyne-cross/logs/windows 2>&1 &
-for job in `jobs -p`
-do
-    wait $job
-done
+ANDROID_NDK_HOME=${ANDROID_HOME}/ndk-bundle/
+(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && fyne package -os android -appID com.aletheiaware.bc -icon $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/ui/data/logo.png -name BC_unaligned)
+(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk)
+(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb install -r -g BC.apk)
+#(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb logcat com.aletheiaware.bc:V org.golang.app:V *:S | tee android.log)
+(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb logcat -c && adb logcat | tee android.log)

@@ -64,7 +64,7 @@ func Test_UI(t *testing.T) {
 			window := a.NewWindow(name)
 			object := tt.builder(window)
 			window.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), object))
-			window.Resize(object.MinSize().Max(fyne.NewSize(400, 300)))
+			window.Resize(object.MinSize().Max(fyne.NewSize(100, 100)))
 			test.AssertImageMatches(t, name+".png", window.Canvas().Capture())
 			window.Close()
 		})

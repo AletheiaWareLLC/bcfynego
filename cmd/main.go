@@ -21,40 +21,10 @@ import (
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
-	"github.com/AletheiaWareLLC/bcclientgo"
 	"github.com/AletheiaWareLLC/bcfynego"
-	"github.com/AletheiaWareLLC/bcgo"
-	"log"
 )
 
 func main() {
-	// Load config files (if any)
-	err := bcgo.LoadConfig()
-	if err != nil {
-		log.Fatal("Could not load config: %w", err)
-	}
-
-	// Get root directory
-	rootDir, err := bcgo.GetRootDirectory()
-	if err != nil {
-		log.Fatal("Could not get root directory: %w", err)
-	}
-
-	// Get cache directory
-	cacheDir, err := bcgo.GetCacheDirectory(rootDir)
-	if err != nil {
-		log.Fatal("Could not get cache directory: %w", err)
-	}
-
-	// Create file cache
-	cache, err := bcgo.NewFileCache(cacheDir)
-	if err != nil {
-		log.Fatal("Could not create file cache: %w", err)
-	}
-
-	// Create network of peers
-	network := bcgo.NewTCPNetwork()
-
 	// Create application
 	a := app.New()
 
@@ -64,11 +34,6 @@ func main() {
 
 	// Create BC client
 	c := &bcfynego.Client{
-		Client: bcclientgo.Client{
-			Root:    rootDir,
-			Cache:   cache,
-			Network: network,
-		},
 		App:    a,
 		Window: w,
 	}
