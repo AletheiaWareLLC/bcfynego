@@ -83,7 +83,7 @@ func (c *BCFyneClient) ExistingNode(alias string, password []byte, callback func
 	callback(node)
 }
 
-func (c *BCFyneClient) GetNode() *bcgo.Node {
+func (c *BCFyneClient) GetNode() (*bcgo.Node, error) {
 	if c.BCClient.Node == nil {
 		nc := make(chan *bcgo.Node, 1)
 		go c.ShowAccessDialog(func(n *bcgo.Node) {
@@ -91,7 +91,7 @@ func (c *BCFyneClient) GetNode() *bcgo.Node {
 		})
 		c.BCClient.Node = <-nc
 	}
-	return c.BCClient.Node
+	return c.BCClient.Node, nil
 }
 
 func (c *BCFyneClient) GetLogo() fyne.CanvasObject {
@@ -229,7 +229,11 @@ func (c *BCFyneClient) ShowError(err error) {
 
 func (c *BCFyneClient) ShowNode() {
 	log.Println("ShowNode")
-	node := c.GetNode()
+	node, err := c.GetNode()
+	if err != nil {
+		c.ShowError(err)
+		return
+	}
 	info := fmt.Sprintf("Alias: %s\n", node.Alias)
 	publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
 	if err == nil {

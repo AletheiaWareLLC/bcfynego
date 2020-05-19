@@ -9,5 +9,6 @@ require (
 	github.com/AletheiaWareLLC/bcgo v0.0.0-20200516190548-459c1abf38b9
 	github.com/AletheiaWareLLC/cryptogo v0.0.0-20200516185501-ee82a4f19582
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8 // indirect
-	golang.org/x/net v0.0.0-20200513185701-a91f0712d120 // indirect
+	golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476 // indirect
+	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
 )
