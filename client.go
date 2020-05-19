@@ -36,14 +36,14 @@ import (
 	"os"
 )
 
-type Client struct {
-	bcclientgo.Client
+type BCFyneClient struct {
+	bcclientgo.BCClient
 	App    fyne.App
 	Window fyne.Window
 	Dialog dialog.Dialog
 }
 
-func (c *Client) ExistingNode(alias string, password []byte, callback func(*bcgo.Node)) {
+func (c *BCFyneClient) ExistingNode(alias string, password []byte, callback func(*bcgo.Node)) {
 	rootDir, err := c.GetRoot()
 	if err != nil {
 		c.ShowError(err)
@@ -83,18 +83,18 @@ func (c *Client) ExistingNode(alias string, password []byte, callback func(*bcgo
 	callback(node)
 }
 
-func (c *Client) GetNode() *bcgo.Node {
-	if c.Client.Node == nil {
+func (c *BCFyneClient) GetNode() *bcgo.Node {
+	if c.BCClient.Node == nil {
 		nc := make(chan *bcgo.Node, 1)
 		go c.ShowAccessDialog(func(n *bcgo.Node) {
 			nc <- n
 		})
-		c.Client.Node = <-nc
+		c.BCClient.Node = <-nc
 	}
-	return c.Client.Node
+	return c.BCClient.Node
 }
 
-func (c *Client) GetLogo() fyne.CanvasObject {
+func (c *BCFyneClient) GetLogo() fyne.CanvasObject {
 	return &canvas.Image{
 		Resource: data.NewThemedResource(data.Logo),
 		//FillMode: canvas.ImageFillContain,
@@ -102,7 +102,7 @@ func (c *Client) GetLogo() fyne.CanvasObject {
 	}
 }
 
-func (c *Client) NewNode(alias string, password []byte, callback func(*bcgo.Node)) {
+func (c *BCFyneClient) NewNode(alias string, password []byte, callback func(*bcgo.Node)) {
 	// Create Progress Dialog
 	progress := dialog.NewProgress("Registering", "message", c.Window)
 	defer progress.Hide()
@@ -153,7 +153,7 @@ func (c *Client) NewNode(alias string, password []byte, callback func(*bcgo.Node
 	callback(node)
 }
 
-func (c *Client) ShowAccessDialog(callback func(*bcgo.Node)) {
+func (c *BCFyneClient) ShowAccessDialog(callback func(*bcgo.Node)) {
 	signIn := account.NewSignIn()
 	importKey := account.NewImportKey()
 	signUp := account.NewSignUp()
@@ -215,11 +215,11 @@ func (c *Client) ShowAccessDialog(callback func(*bcgo.Node)) {
 	c.Dialog.Show()
 }
 
-func (c *Client) ShowAccount() {
+func (c *BCFyneClient) ShowAccount() {
 	//
 }
 
-func (c *Client) ShowError(err error) {
+func (c *BCFyneClient) ShowError(err error) {
 	if c.Dialog != nil {
 		c.Dialog.Hide()
 	}
@@ -227,7 +227,7 @@ func (c *Client) ShowError(err error) {
 	c.Dialog.Show()
 }
 
-func (c *Client) ShowNode() {
+func (c *BCFyneClient) ShowNode() {
 	log.Println("ShowNode")
 	node := c.GetNode()
 	info := fmt.Sprintf("Alias: %s\n", node.Alias)

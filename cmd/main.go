@@ -32,8 +32,8 @@ func main() {
 	w := a.NewWindow("BC")
 	w.SetMaster()
 
-	// Create BC client
-	c := &bcfynego.Client{
+	// Create BC Fyne client
+	c := &bcfynego.BCFyneClient{
 		App:    a,
 		Window: w,
 	}

@@ -1,11 +1,9 @@
 fyne.io/fyne v1.2.5-0.20200516194950-142937105557 h1:QfqICNLAd7KVpWnUGXp1V3xjlS07oE26JA8ynli0i0k=
 fyne.io/fyne v1.2.5-0.20200516194950-142937105557/go.mod h1:aAq4WmIwSqlS2K8Fct81ENxCWzJCIOWk8ndLi+/g88o=
-github.com/AletheiaWareLLC/aliasgo v0.0.0-20200510180614-c8583f09cd4d h1:bNTbZ4WW39jntC1PRNUuMSzNSbZ+b3vh2NqDh0GIOXA=
-github.com/AletheiaWareLLC/aliasgo v0.0.0-20200510180614-c8583f09cd4d/go.mod h1:Ruk4wvz4IbB70LfLg8VO+CDtXEN4Gf/jqAyankJGGZk=
 github.com/AletheiaWareLLC/aliasgo v0.0.0-20200516185311-d59bf1ba3f32 h1:eq5YLU6TM5Ws1xhOpcXBffrWJBAl47uZQZWgpXvbGw4=
 github.com/AletheiaWareLLC/aliasgo v0.0.0-20200516185311-d59bf1ba3f32/go.mod h1:Ruk4wvz4IbB70LfLg8VO+CDtXEN4Gf/jqAyankJGGZk=
-github.com/AletheiaWareLLC/bcclientgo v0.0.0-20200518195906-b3a4cd79d683 h1:DRBcAnB43m3HOP6TscaGugYBxnsuYxh9OKKgLnL3nSw=
-github.com/AletheiaWareLLC/bcclientgo v0.0.0-20200518195906-b3a4cd79d683/go.mod h1:mLxC7BUphwA24vuM24XdKw4Ddklux9gdDA3FKG7ULJs=
+github.com/AletheiaWareLLC/bcclientgo v0.0.0-20200519033449-333a61a40ccf h1:LF0KRFxd/d4efbdhBhi6cMxRfqRW9tGQN1pgvQnMMgw=
+github.com/AletheiaWareLLC/bcclientgo v0.0.0-20200519033449-333a61a40ccf/go.mod h1:glcinR3TvH9U0wOzjAtEkhECxhqL8tEMy4aj32PrMM8=
 github.com/AletheiaWareLLC/bcgo v0.0.0-20200510175557-3a06cf93213b h1:RKF1dfKjsH1IQk4oY2iayFbbH/JJwaN5tBZHeZGZ+ks=
 github.com/AletheiaWareLLC/bcgo v0.0.0-20200510175557-3a06cf93213b/go.mod h1:falCiDlwEUzPvrhiPrr+lrDcLCx4XRu5YNyj4m6a0aY=
 github.com/AletheiaWareLLC/bcgo v0.0.0-20200516190548-459c1abf38b9 h1:aAFq4Lwk16R0Y0tZHnfckghddrSlmQChj+ExFBS2mwg=

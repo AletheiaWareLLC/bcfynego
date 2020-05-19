@@ -23,9 +23,9 @@ import (
 	"os"
 )
 
-func (c *Client) GetRoot() (string, error) {
-	if c.Client.Root == "" {
-		log.Println("bcfynego.Client_android.GetRoot()")
+func (c *BCFyneClient) GetRoot() (string, error) {
+	if c.BCClient.Root == "" {
+		log.Println("bcfynego.BCFyneClient_android.GetRoot()")
 		log.Println("*******************init*******************")
 		log.Println(os.Environ())
 		if _, ok := os.LookupEnv("ROOT_DIRECTORY"); !ok {
@@ -35,5 +35,5 @@ func (c *Client) GetRoot() (string, error) {
 			os.Setenv("CACHE_DIRECTORY", os.Getenv("TMPDIR"))
 		}
 	}
-	return c.Client.GetRoot()
+	return c.BCClient.GetRoot()
 }
