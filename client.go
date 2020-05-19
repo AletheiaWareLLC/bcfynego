@@ -103,11 +103,6 @@ func (c *BCFyneClient) GetLogo() fyne.CanvasObject {
 }
 
 func (c *BCFyneClient) NewNode(alias string, password []byte, callback func(*bcgo.Node)) {
-	// Create Progress Dialog
-	progress := dialog.NewProgress("Registering", "message", c.Window)
-	defer progress.Hide()
-	listener := &ui.ProgressMiningListener{Func: progress.SetValue}
-
 	rootDir, err := c.GetRoot()
 	if err != nil {
 		c.ShowError(err)
@@ -143,6 +138,11 @@ func (c *BCFyneClient) NewNode(alias string, password []byte, callback func(*bcg
 		Network:  network,
 		Channels: make(map[string]*bcgo.Channel),
 	}
+
+	// Create Progress Dialog
+	progress := dialog.NewProgress("Registering", "message", c.Window)
+	defer progress.Hide()
+	listener := &ui.ProgressMiningListener{Func: progress.SetValue}
 
 	// Register Alias
 	if err := aliasgo.Register(node, listener); err != nil {
