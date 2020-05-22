@@ -18,16 +18,10 @@
 
 package bcfynego
 
-import (
-	"log"
-	"os"
-)
+import "os"
 
 func (c *BCFyneClient) GetRoot() (string, error) {
 	if c.BCClient.Root == "" {
-		log.Println("bcfynego.BCFyneClient_android.GetRoot()")
-		log.Println("*******************init*******************")
-		log.Println(os.Environ())
 		if _, ok := os.LookupEnv("ROOT_DIRECTORY"); !ok {
 			os.Setenv("ROOT_DIRECTORY", os.Getenv("FILESDIR"))
 		}

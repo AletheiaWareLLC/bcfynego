@@ -22,9 +22,6 @@ import "os"
 
 func (c *BCFyneClient) GetRoot() (string, error) {
 	if c.BCClient.Root == "" {
-		log.Println("bcfynego.BCFyneClient_ios.GetRoot()")
-		log.Println("*******************init*******************")
-		log.Println(os.Environ())
 		if _, ok := os.LookupEnv("ROOT_DIRECTORY"); !ok {
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
