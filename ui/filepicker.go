@@ -62,7 +62,7 @@ func (r *FilePicker) Cursor() desktop.Cursor {
 func (r *FilePicker) Tapped(*fyne.PointEvent) {
 	log.Println("FilePicker.Tapped")
 	// Show open file dialog
-	dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
+	dialog.ShowFileOpen(func(reader fyne.URIReadCloser, err error) {
 		if err != nil {
 			dialog.ShowError(err, r.window)
 			return
