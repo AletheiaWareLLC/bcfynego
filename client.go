@@ -223,6 +223,7 @@ func (c *BCFyneClient) ShowError(err error) {
 	if c.Dialog != nil {
 		c.Dialog.Hide()
 	}
+	log.Println("Error:", err)
 	c.Dialog = dialog.NewError(err, c.Window)
 	c.Dialog.Show()
 }
