@@ -36,39 +36,38 @@ import (
 	"os"
 )
 
-type BCFyneClient struct {
-	bcclientgo.BCClient
+type BCFyne struct {
 	App    fyne.App
 	Window fyne.Window
 	Dialog dialog.Dialog
 }
 
-func (c *BCFyneClient) ExistingNode(alias string, password []byte, callback func(*bcgo.Node)) {
-	rootDir, err := c.GetRoot()
+func (f *BCFyne) ExistingNode(client *bcclientgo.BCClient, alias string, password []byte, callback func(*bcgo.Node)) {
+	rootDir, err := client.GetRoot()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Get key store
 	keystore, err := bcgo.GetKeyDirectory(rootDir)
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Get private key
 	key, err := cryptogo.GetRSAPrivateKey(keystore, alias, password)
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
-	cache, err := c.GetCache()
+	cache, err := client.GetCache()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
-	network, err := c.GetNetwork()
+	network, err := client.GetNetwork()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Create node
@@ -83,18 +82,18 @@ func (c *BCFyneClient) ExistingNode(alias string, password []byte, callback func
 	callback(node)
 }
 
-func (c *BCFyneClient) GetNode() (*bcgo.Node, error) {
-	if c.BCClient.Node == nil {
+func (f *BCFyne) GetNode(client *bcclientgo.BCClient) (*bcgo.Node, error) {
+	if client.Node == nil {
 		nc := make(chan *bcgo.Node, 1)
-		go c.ShowAccessDialog(func(n *bcgo.Node) {
+		go f.ShowAccessDialog(client, func(n *bcgo.Node) {
 			nc <- n
 		})
-		c.BCClient.Node = <-nc
+		client.Node = <-nc
 	}
-	return c.BCClient.Node, nil
+	return client.Node, nil
 }
 
-func (c *BCFyneClient) GetLogo() fyne.CanvasObject {
+func (f *BCFyne) GetLogo() fyne.CanvasObject {
 	return &canvas.Image{
 		Resource: data.NewThemedResource(data.Logo),
 		//FillMode: canvas.ImageFillContain,
@@ -102,32 +101,32 @@ func (c *BCFyneClient) GetLogo() fyne.CanvasObject {
 	}
 }
 
-func (c *BCFyneClient) NewNode(alias string, password []byte, callback func(*bcgo.Node)) {
-	rootDir, err := c.GetRoot()
+func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []byte, callback func(*bcgo.Node)) {
+	rootDir, err := client.GetRoot()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Get key store
 	keystore, err := bcgo.GetKeyDirectory(rootDir)
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Create private key
 	key, err := cryptogo.CreateRSAPrivateKey(keystore, alias, password)
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
-	cache, err := c.GetCache()
+	cache, err := client.GetCache()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
-	network, err := c.GetNetwork()
+	network, err := client.GetNetwork()
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	// Create node
@@ -140,57 +139,66 @@ func (c *BCFyneClient) NewNode(alias string, password []byte, callback func(*bcg
 	}
 
 	// Create Progress Dialog
-	progress := dialog.NewProgress("Registering", "message", c.Window)
+	progress := dialog.NewProgress("Registering", "Registering "+alias, f.Window)
+	progress.Show()
 	defer progress.Hide()
 	listener := &ui.ProgressMiningListener{Func: progress.SetValue}
 
 	// Register Alias
 	if err := aliasgo.Register(node, listener); err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 
 	callback(node)
 }
 
-func (c *BCFyneClient) ShowAccessDialog(callback func(*bcgo.Node)) {
+func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bcgo.Node)) {
 	signIn := account.NewSignIn()
 	importKey := account.NewImportKey()
 	signUp := account.NewSignUp()
-	c.Dialog = dialog.NewCustom("Account Access", "Cancel",
+	if f.Dialog != nil {
+		f.Dialog.Hide()
+	}
+	f.Dialog = dialog.NewCustom("Account Access", "Cancel",
 		widget.NewAccordionContainer(
 			&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
 			widget.NewAccordionItem("Import Key", importKey.CanvasObject()),
 			widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
-		), c.Window)
+		), f.Window)
 
 	if alias, err := bcgo.GetAlias(); err == nil {
 		signIn.Alias.SetText(alias)
 		importKey.Alias.SetText(alias)
+		signUp.Alias.SetText(alias)
 	}
 	if pwd, ok := os.LookupEnv("PASSWORD"); ok {
 		signIn.Password.SetText(pwd)
 		// TODO if alias was also set auto click
 	}
 	signIn.SignInButton.OnTapped = func() {
-		c.Dialog.Hide()
+		f.Dialog.Hide()
 		log.Println("Sign In Tapped")
 		alias := signIn.Alias.Text
 		password := []byte(signIn.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			c.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
 			return
 		}
-		c.ExistingNode(alias, password, callback)
+		f.ExistingNode(client, alias, password, callback)
 	}
 	importKey.ImportKeyButton.OnTapped = func() {
-		c.Dialog.Hide()
+		f.Dialog.Hide()
 		log.Println("Import Key Tapped")
-		// TODO alias := importKey.Alias.Text
-		// TODO access := importKey.Access.Text
+		host := bcgo.GetBCHost()
+		alias := importKey.Alias.Text
+		access := importKey.Access.Text
+		if err := client.ImportKeys(host, alias, access); err != nil {
+			f.ShowError(err)
+		}
 	}
 	signUp.SignUpButton.OnTapped = func() {
-		c.Dialog.Hide()
+		f.Dialog.Hide()
 		log.Println("Sign Up Tapped")
 		alias := signUp.Alias.Text
 		password := []byte(signUp.Password.Text)
@@ -198,41 +206,44 @@ func (c *BCFyneClient) ShowAccessDialog(callback func(*bcgo.Node)) {
 
 		err := aliasgo.ValidateAlias(alias)
 		if err != nil {
-			c.ShowError(err)
+			f.ShowError(err)
 			return
 		}
 
 		if len(password) < cryptogo.MIN_PASSWORD {
-			c.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
 			return
 		}
 		if !bytes.Equal(password, confirm) {
-			c.ShowError(errors.New(cryptogo.ERROR_PASSWORDS_DO_NOT_MATCH))
+			f.ShowError(errors.New(cryptogo.ERROR_PASSWORDS_DO_NOT_MATCH))
 			return
 		}
-		c.NewNode(alias, password, callback)
+		f.NewNode(client, alias, password, callback)
 	}
-	c.Dialog.Show()
+	f.Dialog.Show()
 }
 
-func (c *BCFyneClient) ShowAccount() {
-	//
+func (f *BCFyne) ShowAccount() {
+	// TODO Alias
+	// TODO Public Key
+	// TODO Export Key
+	// access, err := bcgo.ExportKeys(bcgo.GetBCHost(), alias string)
 }
 
-func (c *BCFyneClient) ShowError(err error) {
-	if c.Dialog != nil {
-		c.Dialog.Hide()
-	}
+func (f *BCFyne) ShowError(err error) {
 	log.Println("Error:", err)
-	c.Dialog = dialog.NewError(err, c.Window)
-	c.Dialog.Show()
+	if f.Dialog != nil {
+		f.Dialog.Hide()
+	}
+	f.Dialog = dialog.NewError(err, f.Window)
+	f.Dialog.Show()
 }
 
-func (c *BCFyneClient) ShowNode() {
+func (f *BCFyne) ShowNode(client *bcclientgo.BCClient) {
 	log.Println("ShowNode")
-	node, err := c.GetNode()
+	node, err := f.GetNode(client)
 	if err != nil {
-		c.ShowError(err)
+		f.ShowError(err)
 		return
 	}
 	info := fmt.Sprintf("Alias: %s\n", node.Alias)
@@ -240,6 +251,10 @@ func (c *BCFyneClient) ShowNode() {
 	if err == nil {
 		info = fmt.Sprintf("%sPublicKey: %s\n", info, base64.RawURLEncoding.EncodeToString(publicKeyBytes))
 	}
-	c.Dialog = dialog.NewInformation("Node", info, c.Window)
-	c.Dialog.Show()
+	// TODO create new window instead of dialog
+	if f.Dialog != nil {
+		f.Dialog.Hide()
+	}
+	f.Dialog = dialog.NewInformation("Node", info, f.Window)
+	f.Dialog.Show()
 }

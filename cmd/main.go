@@ -21,31 +21,172 @@ import (
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
+	"github.com/AletheiaWareLLC/bcclientgo"
 	"github.com/AletheiaWareLLC/bcfynego"
+	"log"
 )
 
 func main() {
-	// Create application
+	// Create Application
 	a := app.New()
 
-	// Create window
+	// Create Window
 	w := a.NewWindow("BC")
 	w.SetMaster()
 
-	// Create BC Fyne client
-	c := &bcfynego.BCFyneClient{
+	// Create BC Client
+	c := &bcclientgo.BCClient{}
+
+	// Create BC Fyne
+	f := &bcfynego.BCFyne{
 		App:    a,
 		Window: w,
 	}
 
-	logo := c.GetLogo()
+	logo := f.GetLogo()
 
-	nodeButton := widget.NewButton("Node", func() {
-		go c.ShowNode()
-	})
-
-	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(logo, nil, nil, nil), logo, widget.NewAccordionContainer(
-		widget.NewAccordionItem("Node", nodeButton))))
+	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(logo, nil, nil, nil), logo, widget.NewScrollContainer(widget.NewAccordionContainer(
+		widget.NewAccordionItem("Node", widget.NewVBox(
+			widget.NewButton("GetNode", func() {
+				go func() {
+					n, err := c.GetNode()
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						log.Println(n)
+					}
+				}()
+			}),
+			widget.NewButton("ShowNode", func() {
+				go f.ShowNode(c)
+			}),
+			widget.NewButton("NewNode", func() {
+				log.Println("// TODO go c.NewNode()")
+			}),
+			widget.NewButton("ExistingNode", func() {
+				log.Println("// TODO go c.ExistingNode()")
+			}),
+			widget.NewButton("SetNode", func() {
+				log.Println("// TODO go c.SetNode()")
+			}),
+		)),
+		widget.NewAccordionItem("Alias", widget.NewVBox(
+			widget.NewButton("Register", func() {
+				log.Println("// TODO go c.Register()")
+			}),
+			widget.NewButton("Alias", func() {
+				log.Println("// TODO go c.Alias()")
+			}),
+		)),
+		widget.NewAccordionItem("Account", widget.NewVBox(
+			widget.NewButton("ShowAccount", func() {
+				go f.ShowAccount()
+			}),
+			widget.NewButton("ShowAccessDialog", func() {
+				log.Println("// TODO go c.ShowAccessDialog()")
+			}),
+			widget.NewButton("ImportKeys", func() {
+				log.Println("// TODO go c.ImportKeys()")
+			}),
+			widget.NewButton("ExportKeys", func() {
+				log.Println("// TODO go c.ExportKeys()")
+			}),
+		)),
+		widget.NewAccordionItem("ShowError", widget.NewButton("ShowError", func() {
+			go f.ShowError(nil)
+		})),
+		widget.NewAccordionItem("Root", widget.NewVBox(
+			widget.NewButton("GetRoot", func() {
+				go log.Println(c.GetRoot())
+			}),
+			widget.NewButton("SetRoot", func() {
+				log.Println("// TODO go log.Println(c.SetRoot())")
+			}),
+		)),
+		widget.NewAccordionItem("Peers", widget.NewVBox(
+			widget.NewButton("GetDefaultPeers", func() {
+				go func() {
+					ps, err := c.GetDefaultPeers()
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						log.Println(ps)
+					}
+				}()
+			}),
+			widget.NewButton("GetPeers", func() {
+				go func() {
+					ps, err := c.GetPeers()
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						log.Println(ps)
+					}
+				}()
+			}),
+			widget.NewButton("SetPeers", func() {
+				log.Println("// TODO go log.Println(c.SetPeers())")
+			}),
+		)),
+		widget.NewAccordionItem("Cache", widget.NewVBox(
+			widget.NewButton("GetCache", func() {
+				go func() {
+					ch, err := c.GetCache()
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						log.Println(ch)
+					}
+				}()
+			}),
+			widget.NewButton("SetCache", func() {
+				log.Println("// TODO go go log.Println(c.SetCache())")
+			}),
+			widget.NewButton("Purge", func() {
+				log.Println("// TODO go c.Purge()")
+			}),
+		)),
+		widget.NewAccordionItem("Network", widget.NewVBox(
+			widget.NewButton("GetNetwork", func() {
+				go func() {
+					n, err := c.GetNetwork()
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						log.Println(n)
+					}
+				}()
+			}),
+			widget.NewButton("SetNetwork", func() {
+				log.Println("// TODO go go log.Println(c.SetNetwork())")
+			}),
+			widget.NewButton("Pull", func() {
+				log.Println("// TODO go c.Pull()")
+			}),
+			widget.NewButton("Push", func() {
+				log.Println("// TODO go c.Push()")
+			}),
+		)),
+		widget.NewAccordionItem("Channel", widget.NewVBox(
+			widget.NewButton("Head", func() {
+				log.Println("// TODO go c.Head()")
+			}), widget.NewButton("Block", func() {
+				log.Println("// TODO go c.Block()")
+			}), widget.NewButton("Record", func() {
+				log.Println("// TODO go c.Record()")
+			}), widget.NewButton("Read", func() {
+				log.Println("// TODO go c.Read()")
+			}), widget.NewButton("ReadKey", func() {
+				log.Println("// TODO go c.ReadKey()")
+			}), widget.NewButton("ReadPayload", func() {
+				log.Println("// TODO go c.ReadPayload()")
+			}), widget.NewButton("Write", func() {
+				log.Println("// TODO go c.Write()")
+			}), widget.NewButton("Mine", func() {
+				log.Println("// TODO go c.Mine()")
+			}),
+		)),
+	))))
 	w.Resize(fyne.NewSize(800, 600))
 	w.CenterOnScreen()
 	w.ShowAndRun()

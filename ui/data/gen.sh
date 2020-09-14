@@ -18,8 +18,4 @@ set -e
 set -x
 
 fyne bundle -name Logo -package data bc.svg > icon.go
-#fyne bundle -append -name LogoUnmasked -package data bc-unmasked.svg >> icon.go
-#fyne bundle -append -name FileNewIcon -package data file-new.svg >> icon.go
-#fyne bundle -append -name CloudSaveIcon -package data cloud-save.svg >> icon.go
-#fyne bundle -append -name PencilIcon -package data pencil.svg >> icon.go
-#fyne bundle -append -name EraserIcon -package data eraser.svg >> icon.go
+fyne bundle -append -name AccountIcon -package data account.svg >> icon.go
