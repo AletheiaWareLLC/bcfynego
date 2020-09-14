@@ -21,35 +21,31 @@ import (
 	"fmt"
 	"fyne.io/fyne"
 	"image/color"
-	"strconv"
 	"strings"
 )
 
-type ThemedResource struct {
+type PrimaryThemedResource struct {
 	source fyne.Resource
 }
 
-func NewThemedResource(source fyne.Resource) *ThemedResource {
-	return &ThemedResource{
+func NewPrimaryThemedResource(source fyne.Resource) *PrimaryThemedResource {
+	return &PrimaryThemedResource{
 		source: source,
 	}
 }
 
-func (res *ThemedResource) Name() string {
+func (res *PrimaryThemedResource) Name() string {
+	// TODO log.Println("PrimaryThemedResource.Name")
 	return res.source.Name()
 }
 
-func (res *ThemedResource) Content() []byte {
-	background := colorToHexString(fyne.CurrentApp().Settings().Theme().BackgroundColor())
+func (res *PrimaryThemedResource) Content() []byte {
+	// TODO log.Println("PrimaryThemedResource.Content")
+	primary := colorToHexString(fyne.CurrentApp().Settings().Theme().PrimaryColor())
 	icon := colorToHexString(fyne.CurrentApp().Settings().Theme().IconColor())
-	primary := "#00ffff" //colorToHexString(fyne.CurrentApp().Settings().Theme().PrimaryColor())
-	textsize := fyne.CurrentApp().Settings().Theme().TextSize()
 	svg := string(res.source.Content())
-	svg = strings.ReplaceAll(svg, "background", background)
-	svg = strings.ReplaceAll(svg, "flasksize", strconv.Itoa(textsize))
-	svg = strings.ReplaceAll(svg, "icon", icon)
 	svg = strings.ReplaceAll(svg, "primary", primary)
-	svg = strings.ReplaceAll(svg, "textsize", strconv.Itoa(textsize*2))
+	svg = strings.ReplaceAll(svg, "icon", icon)
 	// TODO cache until theme changes
 	return []byte(svg)
 }

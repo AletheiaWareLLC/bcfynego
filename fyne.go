@@ -95,7 +95,7 @@ func (f *BCFyne) GetNode(client *bcclientgo.BCClient) (*bcgo.Node, error) {
 
 func (f *BCFyne) GetLogo() fyne.CanvasObject {
 	return &canvas.Image{
-		Resource: data.NewThemedResource(data.Logo),
+		Resource: data.NewPrimaryThemedResource(data.Logo),
 		//FillMode: canvas.ImageFillContain,
 		FillMode: canvas.ImageFillOriginal,
 	}

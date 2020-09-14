@@ -52,7 +52,7 @@ func Test_UI(t *testing.T) {
 		"logo": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				img := &canvas.Image{
-					Resource: data.NewThemedResource(data.Logo),
+					Resource: data.NewPrimaryThemedResource(data.Logo),
 					FillMode: canvas.ImageFillOriginal,
 				}
 				img.SetMinSize(fyne.NewSize(26, 48))
