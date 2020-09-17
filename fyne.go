@@ -190,7 +190,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	importKey.ImportKeyButton.OnTapped = func() {
 		f.Dialog.Hide()
 		log.Println("Import Key Tapped")
-		host := bcgo.GetBCHost()
+		host := bcgo.GetBCWebsite()
 		alias := importKey.Alias.Text
 		access := importKey.Access.Text
 		if err := client.ImportKeys(host, alias, access); err != nil {
@@ -227,7 +227,7 @@ func (f *BCFyne) ShowAccount() {
 	// TODO Alias
 	// TODO Public Key
 	// TODO Export Key
-	// access, err := bcgo.ExportKeys(bcgo.GetBCHost(), alias string)
+	// access, err := bcgo.ExportKeys(bcgo.GetBCWebsite(), alias string)
 }
 
 func (f *BCFyne) ShowError(err error) {
