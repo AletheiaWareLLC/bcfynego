@@ -18,9 +18,9 @@ set -e
 set -x
 
 (cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/ui/data/ && ./gen.sh)
-go fmt $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
-go vet $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
-go test $GOPATH/src/github.com/AletheiaWareLLC/{bcfynego,bcfynego/...}
+go fmt $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
+go vet $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
+go test $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
 ANDROID_NDK_HOME=${ANDROID_HOME}/ndk-bundle/
 (cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && fyne package -os android -appID com.aletheiaware.bc -icon $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/ui/data/logo.png -name BC_unaligned)
 (cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk)
