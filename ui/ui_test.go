@@ -41,7 +41,12 @@ func Test_UI(t *testing.T) {
 		},
 		"account/sign_in": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
-				return account.NewSignIn().CanvasObject()
+				return account.NewSignIn(nil).CanvasObject()
+			},
+		},
+		"account/sign_in_existing": {
+			builder: func(w fyne.Window) fyne.CanvasObject {
+				return account.NewSignIn([]string{"Alice"}).CanvasObject()
 			},
 		},
 		"account/sign_up": {

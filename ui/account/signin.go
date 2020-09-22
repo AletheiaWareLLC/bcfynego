@@ -23,19 +23,22 @@ import (
 )
 
 type SignIn struct {
-	Alias        *widget.Entry
+	Alias        *widget.SelectEntry
 	Password     *widget.Entry
 	SignInButton *widget.Button
 }
 
-func NewSignIn() *SignIn {
+func NewSignIn(aliases []string) *SignIn {
 	s := &SignIn{
-		Alias:    widget.NewEntry(),
+		Alias:    widget.NewSelectEntry(aliases),
 		Password: widget.NewPasswordEntry(),
 		SignInButton: &widget.Button{
 			Style: widget.PrimaryButton,
 			Text:  "Sign In",
 		},
+	}
+	if len(aliases) > 0 {
+		s.Alias.SetText(aliases[0])
 	}
 	s.Alias.SetPlaceHolder("Alias")
 	s.Password.SetPlaceHolder("Password")

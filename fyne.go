@@ -156,7 +156,26 @@ func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []b
 }
 
 func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bcgo.Node)) {
-	signIn := account.NewSignIn()
+	var aliases []string
+
+	rootDir, err := client.GetRoot()
+	if err != nil {
+		log.Println(err)
+	} else {
+		keystore, err := bcgo.GetKeyDirectory(rootDir)
+		if err != nil {
+			log.Println(err)
+		} else {
+			keys, err := cryptogo.ListRSAPrivateKeys(keystore)
+			if err != nil {
+				log.Println(err)
+			} else {
+				aliases = keys
+			}
+		}
+	}
+
+	signIn := account.NewSignIn(aliases)
 	importKey := account.NewImportKey()
 	signUp := account.NewSignUp()
 	if f.Dialog != nil {
