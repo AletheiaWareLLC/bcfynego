@@ -61,18 +61,15 @@ func main() {
 
 	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(logo, nil, nil, nil), logo, widget.NewScrollContainer(widget.NewAccordionContainer(
 		widget.NewAccordionItem("Node", widget.NewVBox(
-			widget.NewButton("GetNode", func() {
+			widget.NewButton("Node", func() {
 				go func() {
-					n, err := c.GetNode()
+					n, err := f.GetNode(c)
 					if err != nil {
 						f.ShowError(err)
 					} else {
-						log.Println(n)
+						f.ShowNode(n)
 					}
 				}()
-			}),
-			widget.NewButton("ShowNode", func() {
-				go f.ShowNode(c)
 			}),
 			widget.NewButton("NewNode", func() {
 				log.Println("// TODO go c.NewNode()")
@@ -94,7 +91,7 @@ func main() {
 		)),
 		widget.NewAccordionItem("Account", widget.NewVBox(
 			widget.NewButton("ShowAccount", func() {
-				go f.ShowAccount()
+				go f.ShowAccount(c)
 			}),
 			widget.NewButton("ShowAccessDialog", func() {
 				log.Println("// TODO go c.ShowAccessDialog()")

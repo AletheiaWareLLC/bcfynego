@@ -24,6 +24,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/bcclientgo"
@@ -34,6 +35,7 @@ import (
 	"github.com/AletheiaWareLLC/cryptogo"
 	"log"
 	"os"
+	"runtime/debug"
 )
 
 type BCFyne struct {
@@ -163,7 +165,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	f.Dialog = dialog.NewCustom("Account Access", "Cancel",
 		widget.NewAccordionContainer(
 			&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
-			widget.NewAccordionItem("Import Key", importKey.CanvasObject()),
+			widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
 			widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
 		), f.Window)
 
@@ -223,15 +225,44 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	f.Dialog.Show()
 }
 
-func (f *BCFyne) ShowAccount() {
-	// TODO Alias
-	// TODO Public Key
-	// TODO Export Key
-	// access, err := bcgo.ExportKeys(bcgo.GetBCWebsite(), alias string)
+func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
+	log.Println("ShowAccount")
+	node, err := f.GetNode(client)
+	if err != nil {
+		f.ShowError(err)
+		return
+	}
+	box := widget.NewVBox(
+		f.nodeUI(node),
+		widget.NewButton("Export Keys", func() {
+			access, err := client.ExportKeys(bcgo.GetBCWebsite(), node.Alias)
+			if err != nil {
+				f.ShowError(err)
+				return
+			}
+			info := fmt.Sprintf("Alias: %s\nAccess Code: %s", node.Alias, access)
+			dialog := dialog.NewInformation("Export Keys", info, f.Window)
+			dialog.Show()
+		}),
+		widget.NewButton("Switch Keys", func() {
+			// TODO
+			f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.SwitchKeys"))
+		}),
+		widget.NewButton("Delete Keys", func() {
+			// TODO
+			f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
+		}),
+	)
+	if f.Dialog != nil {
+		f.Dialog.Hide()
+	}
+	f.Dialog = dialog.NewCustom("Account", "OK", box, f.Window)
+	f.Dialog.Show()
 }
 
 func (f *BCFyne) ShowError(err error) {
 	log.Println("Error:", err)
+	debug.PrintStack()
 	if f.Dialog != nil {
 		f.Dialog.Hide()
 	}
@@ -239,22 +270,45 @@ func (f *BCFyne) ShowError(err error) {
 	f.Dialog.Show()
 }
 
-func (f *BCFyne) ShowNode(client *bcclientgo.BCClient) {
+func (f *BCFyne) ShowNode(node *bcgo.Node) {
 	log.Println("ShowNode")
-	node, err := f.GetNode(client)
-	if err != nil {
-		f.ShowError(err)
-		return
-	}
-	info := fmt.Sprintf("Alias: %s\n", node.Alias)
-	publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
-	if err == nil {
-		info = fmt.Sprintf("%sPublicKey: %s\n", info, base64.RawURLEncoding.EncodeToString(publicKeyBytes))
-	}
-	// TODO create new window instead of dialog
+	form := f.nodeUI(node)
 	if f.Dialog != nil {
 		f.Dialog.Hide()
 	}
-	f.Dialog = dialog.NewInformation("Node", info, f.Window)
+	f.Dialog = dialog.NewCustom("Node", "OK", form, f.Window)
 	f.Dialog.Show()
+}
+
+func (f *BCFyne) nodeUI(node *bcgo.Node) fyne.CanvasObject {
+	publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
+	if err != nil {
+		f.ShowError(err)
+		return nil
+	}
+
+	publicKeyBase64 := base64.RawURLEncoding.EncodeToString(publicKeyBytes)
+	var publicKeyRunes []rune
+	for i, r := range []rune(publicKeyBase64) {
+		if i > 0 && i%64 == 0 {
+			publicKeyRunes = append(publicKeyRunes, '\n')
+		}
+		publicKeyRunes = append(publicKeyRunes, r)
+	}
+
+	aliasScroller := widget.NewHScrollContainer(widget.NewLabel(node.Alias))
+	publicKeyScroller := widget.NewHScrollContainer(widget.NewLabelWithStyle(string(publicKeyRunes), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
+	publicKeyScroller.SetMinSize(fyne.NewSize(10*theme.TextSize(), 0))
+
+	form := widget.NewForm(
+		widget.NewFormItem(
+			"Alias",
+			aliasScroller,
+		),
+		widget.NewFormItem(
+			"Public Key",
+			publicKeyScroller,
+		),
+	)
+	return form
 }
