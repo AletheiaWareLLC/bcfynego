@@ -17,6 +17,7 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
@@ -93,7 +94,7 @@ func main() {
 			}),
 		)),
 		widget.NewAccordionItem("ShowError", widget.NewButton("ShowError", func() {
-			go f.ShowError(nil)
+			go f.ShowError(fmt.Errorf("Sample Error"))
 		})),
 		widget.NewAccordionItem("Root", widget.NewVBox(
 			widget.NewButton("GetRoot", func() {
