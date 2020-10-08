@@ -22,33 +22,31 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-type SignIn struct {
-	Alias        *widget.SelectEntry
-	Password     *widget.Entry
-	SignInButton *widget.Button
+type Authentication struct {
+	Alias              *widget.Label
+	Password           *widget.Entry
+	AuthenticateButton *widget.Button
 }
 
-func NewSignIn() *SignIn {
-	s := &SignIn{
-		Alias:    widget.NewSelectEntry([]string{}),
+func NewAuthentication(alias string) *Authentication {
+	s := &Authentication{
+		Alias:    widget.NewLabel(alias),
 		Password: widget.NewPasswordEntry(),
-		SignInButton: &widget.Button{
+		AuthenticateButton: &widget.Button{
 			Style: widget.PrimaryButton,
-			Text:  "Sign In",
+			Text:  "Authenticate",
 		},
 	}
-	s.Alias.SetPlaceHolder("Alias")
 	s.Password.SetPlaceHolder("Password")
-	// TODO Alias is single line, handle enter key by moving to password
 	// TODO Password is single line, handle enter key by moving to button/auto click
 	return s
 }
 
-func (s *SignIn) CanvasObject() fyne.CanvasObject {
+func (s *Authentication) CanvasObject() fyne.CanvasObject {
 	return fyne.NewContainerWithLayout(layout.NewGridLayout(1),
 		s.Alias,
 		s.Password,
 		layout.NewSpacer(),
-		s.SignInButton,
+		s.AuthenticateButton,
 	)
 }

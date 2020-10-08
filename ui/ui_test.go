@@ -34,6 +34,11 @@ func Test_UI(t *testing.T) {
 	for name, tt := range map[string]struct {
 		builder func(fyne.Window) fyne.CanvasObject
 	}{
+		"account/authentication": {
+			builder: func(w fyne.Window) fyne.CanvasObject {
+				return account.NewAuthentication("Alice").CanvasObject()
+			},
+		},
 		"account/import_key": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				return account.NewImportKey().CanvasObject()
@@ -41,12 +46,15 @@ func Test_UI(t *testing.T) {
 		},
 		"account/sign_in": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
-				return account.NewSignIn(nil).CanvasObject()
+				return account.NewSignIn().CanvasObject()
 			},
 		},
 		"account/sign_in_existing": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
-				return account.NewSignIn([]string{"Alice"}).CanvasObject()
+				s := account.NewSignIn()
+				s.Alias.SetOptions([]string{"Alice"})
+				s.Alias.SetText("Alice")
+				return s.CanvasObject()
 			},
 		},
 		"account/sign_up": {
