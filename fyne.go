@@ -39,12 +39,14 @@ import (
 )
 
 type BCFyne struct {
-	App          fyne.App
-	Window       fyne.Window
-	Dialog       dialog.Dialog
-	OnImportKeys func(string)
-	OnSignIn     func(*bcgo.Node)
-	OnSignUp     func(*bcgo.Node)
+	App            fyne.App
+	Window         fyne.Window
+	Dialog         dialog.Dialog
+	OnKeysExported func(string)
+	OnKeysImported func(string)
+	OnSignedIn     func(*bcgo.Node)
+	OnSignedUp     func(*bcgo.Node)
+	OnSignedOut    func()
 }
 
 func NewBCFyne(a fyne.App, w fyne.Window) *BCFyne {
@@ -192,7 +194,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		}
 		f.ExistingNode(client, alias, password, func(node *bcgo.Node) {
 			callback(node)
-			if c := f.OnSignIn; c != nil {
+			if c := f.OnSignedIn; c != nil {
 				go c(node)
 			}
 		})
@@ -216,7 +218,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			f.ShowError(err)
 			return
 		}
-		if c := f.OnImportKeys; c != nil {
+		if c := f.OnKeysImported; c != nil {
 			go c(alias)
 		}
 	}
@@ -245,7 +247,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		}
 		f.NewNode(client, alias, password, func(node *bcgo.Node) {
 			callback(node)
-			if c := f.OnSignUp; c != nil {
+			if c := f.OnSignedUp; c != nil {
 				go c(node)
 			}
 		})
@@ -321,6 +323,9 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 					widget.NewFormItem("Access Code", widget.NewLabel(access)),
 				)
 				dialog.ShowCustom("Export Keys", "OK", form, f.Window)
+				if c := f.OnKeysExported; c != nil {
+					go c(node.Alias)
+				}
 			}
 			dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
 		}),
@@ -332,13 +337,20 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 			client.Cache = nil
 			client.Network = nil
 			client.Node = nil
+			if c := f.OnSignedOut; c != nil {
+				go c()
+			}
 		}),
 		widget.NewButton("Delete Keys", func() {
 			if f.Dialog != nil {
 				f.Dialog.Hide()
 			}
-			// TODO
 			f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
+			/* TODO
+			if c := f.OnSignedOut; c != nil {
+				go c()
+			}
+			*/
 		}),
 	)
 	if f.Dialog != nil {
