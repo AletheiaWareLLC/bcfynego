@@ -39,23 +39,11 @@ func main() {
 	w := a.NewWindow("BC")
 	w.SetMaster()
 
-	peers := bcgo.SplitRemoveEmpty(*peer, ",")
-	if len(peers) == 0 {
-		peers = append(peers,
-			bcgo.GetBCHost(), // Add BC host as peer
-		)
-	}
-
 	// Create BC Client
-	c := &bcclientgo.BCClient{
-		Peers: peers,
-	}
+	c := bcclientgo.NewBCClient(bcgo.SplitRemoveEmpty(*peer, ",")...)
 
 	// Create BC Fyne
-	f := &bcfynego.BCFyne{
-		App:    a,
-		Window: w,
-	}
+	f := bcfynego.NewBCFyne(a, w)
 
 	logo := f.GetLogo()
 

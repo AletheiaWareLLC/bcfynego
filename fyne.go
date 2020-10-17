@@ -47,6 +47,13 @@ type BCFyne struct {
 	OnSignUp     func(*bcgo.Node)
 }
 
+func NewBCFyne(a fyne.App, w fyne.Window) *BCFyne {
+	return &BCFyne{
+		App:    a,
+		Window: w,
+	}
+}
+
 func (f *BCFyne) ExistingNode(client *bcclientgo.BCClient, alias string, password []byte, callback func(*bcgo.Node)) {
 	rootDir, err := client.GetRoot()
 	if err != nil {
