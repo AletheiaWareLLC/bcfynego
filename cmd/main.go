@@ -43,7 +43,6 @@ func main() {
 
 	// Create Window
 	w := a.NewWindow("BC")
-	w.SetMaster()
 
 	// Create BC Client
 	c := bcclientgo.NewBCClient(bcgo.SplitRemoveEmpty(*peer, ",")...)
