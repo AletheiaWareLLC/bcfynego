@@ -27,6 +27,7 @@ import (
 	"github.com/AletheiaWareLLC/bcfynego"
 	"github.com/AletheiaWareLLC/bcgo"
 	"log"
+	"os"
 )
 
 var peer = flag.String("peer", "", "BC peer")
@@ -43,6 +44,11 @@ func main() {
 
 	// Create Window
 	w := a.NewWindow("BC")
+
+	// Set environment variable
+	if a.Settings().BuildType() == fyne.ReleaseBuild {
+		os.Setenv("LIVE", "true")
+	}
 
 	// Create BC Client
 	c := bcclientgo.NewBCClient(bcgo.SplitRemoveEmpty(*peer, ",")...)
