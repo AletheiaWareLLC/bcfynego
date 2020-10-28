@@ -3,7 +3,7 @@ module github.com/AletheiaWareLLC/bcfynego
 go 1.14
 
 require (
-	fyne.io/fyne v1.3.3
+	fyne.io/fyne v1.4.0-rc1
 	github.com/AletheiaWareLLC/aliasgo v0.0.0-20200917165905-e10e380456b5
 	github.com/AletheiaWareLLC/bcclientgo v0.0.0-20201021001633-7e5c52064bea
 	github.com/AletheiaWareLLC/bcgo v0.0.0-20201021001123-35bd5cc1e539
