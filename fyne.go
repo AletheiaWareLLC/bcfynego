@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -174,12 +175,20 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	if f.Dialog != nil {
 		f.Dialog.Hide()
 	}
+	tos := &widget.Hyperlink{Text: "Terms of Service"}
+	tos.SetURLFromString("https://aletheiaware.com/terms-of-service.html")
+	pp := &widget.Hyperlink{Text: "Privacy Policy", Alignment: fyne.TextAlignTrailing}
+	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
 	f.Dialog = dialog.NewCustom("Account Access", "Cancel",
-		widget.NewAccordionContainer(
-			&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
-			widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
-			widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
-		), f.Window)
+		container.NewVBox(
+			widget.NewAccordionContainer(
+				&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
+				widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
+				widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
+			),
+			container.NewGridWithColumns(2, tos, pp),
+		),
+		f.Window)
 
 	signIn.SignInButton.OnTapped = func() {
 		if f.Dialog != nil {

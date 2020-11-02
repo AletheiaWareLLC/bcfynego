@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
-	"fyne.io/fyne/layout"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/widget"
 	"github.com/AletheiaWareLLC/bcclientgo"
 	"github.com/AletheiaWareLLC/bcfynego"
@@ -58,7 +58,7 @@ func main() {
 
 	logo := f.GetLogo()
 
-	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(logo, nil, nil, nil), logo, widget.NewScrollContainer(widget.NewAccordionContainer(
+	w.SetContent(container.NewBorder(logo, nil, nil, nil, widget.NewScrollContainer(widget.NewAccordionContainer(
 		widget.NewAccordionItem("Node", widget.NewVBox(
 			widget.NewButton("Node", func() {
 				go func() {
