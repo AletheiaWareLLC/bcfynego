@@ -172,8 +172,8 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	signIn := account.NewSignIn()
 	importKey := account.NewImportKey()
 	signUp := account.NewSignUp()
-	if f.Dialog != nil {
-		f.Dialog.Hide()
+	if d := f.Dialog; d != nil {
+		d.Hide()
 	}
 	tos := &widget.Hyperlink{Text: "Terms of Service"}
 	tos.SetURLFromString("https://aletheiaware.com/terms-of-service.html")
@@ -191,8 +191,8 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		f.Window)
 
 	signIn.SignInButton.OnTapped = func() {
-		if f.Dialog != nil {
-			f.Dialog.Hide()
+		if d := f.Dialog; d != nil {
+			d.Hide()
 		}
 		log.Println("Sign In Tapped")
 		alias := signIn.Alias.Text
@@ -209,8 +209,8 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		})
 	}
 	importKey.ImportKeyButton.OnTapped = func() {
-		if f.Dialog != nil {
-			f.Dialog.Hide()
+		if d := f.Dialog; d != nil {
+			d.Hide()
 		}
 		log.Println("Import Key Tapped")
 
@@ -232,8 +232,8 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		}
 	}
 	signUp.SignUpButton.OnTapped = func() {
-		if f.Dialog != nil {
-			f.Dialog.Hide()
+		if d := f.Dialog; d != nil {
+			d.Hide()
 		}
 		log.Println("Sign Up Tapped")
 		alias := signUp.Alias.Text
@@ -306,8 +306,8 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 		widget.NewButton("Export Keys", func() {
 			authentication := account.NewAuthentication(node.Alias)
 			authentication.AuthenticateButton.OnTapped = func() {
-				if f.Dialog != nil {
-					f.Dialog.Hide()
+				if d := f.Dialog; d != nil {
+					d.Hide()
 				}
 
 				// Display Progress Dialog
@@ -339,8 +339,8 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 			dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
 		}),
 		widget.NewButton("Switch Keys", func() {
-			if f.Dialog != nil {
-				f.Dialog.Hide()
+			if d := f.Dialog; d != nil {
+				d.Hide()
 			}
 			client.Root = ""
 			client.Cache = nil
@@ -351,8 +351,8 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 			}
 		}),
 		widget.NewButton("Delete Keys", func() {
-			if f.Dialog != nil {
-				f.Dialog.Hide()
+			if d := f.Dialog; d != nil {
+				d.Hide()
 			}
 			f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
 			/* TODO
@@ -362,8 +362,8 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 			*/
 		}),
 	)
-	if f.Dialog != nil {
-		f.Dialog.Hide()
+	if d := f.Dialog; d != nil {
+		d.Hide()
 	}
 	f.Dialog = dialog.NewCustom("Account", "OK", box, f.Window)
 	f.Dialog.Show()
@@ -372,8 +372,8 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 func (f *BCFyne) ShowError(err error) {
 	log.Println("Error:", err)
 	debug.PrintStack()
-	if f.Dialog != nil {
-		f.Dialog.Hide()
+	if d := f.Dialog; d != nil {
+		d.Hide()
 	}
 	f.Dialog = dialog.NewError(err, f.Window)
 	f.Dialog.Show()
@@ -381,8 +381,8 @@ func (f *BCFyne) ShowError(err error) {
 
 func (f *BCFyne) ShowNode(node *bcgo.Node) {
 	form := f.nodeUI(node)
-	if f.Dialog != nil {
-		f.Dialog.Hide()
+	if d := f.Dialog; d != nil {
+		d.Hide()
 	}
 	f.Dialog = dialog.NewCustom("Node", "OK", form, f.Window)
 	f.Dialog.Show()
