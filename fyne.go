@@ -117,6 +117,11 @@ func (f *BCFyne) GetLogo() fyne.CanvasObject {
 }
 
 func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []byte, callback func(*bcgo.Node)) {
+	// Show progress dialog
+	progress := dialog.NewProgressInfinite("Creating", "Creating "+alias, f.Window)
+	progress.Show()
+	defer progress.Hide()
+
 	rootDir, err := client.GetRoot()
 	if err != nil {
 		f.ShowError(err)
@@ -153,19 +158,21 @@ func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []b
 		Channels: make(map[string]*bcgo.Channel),
 	}
 
-	// Display Progress Dialog
-	progress := dialog.NewProgress("Registering", "Registering "+alias, f.Window)
-	progress.Show()
-	defer progress.Hide()
-	listener := &ui.ProgressMiningListener{Func: progress.SetValue}
+	{
+		// Show Progress Dialog
+		progress := dialog.NewProgress("Registering", "Registering "+alias, f.Window)
+		progress.Show()
+		defer progress.Hide()
+		listener := &ui.ProgressMiningListener{Func: progress.SetValue}
 
-	// Register Alias
-	if err := aliasgo.Register(node, listener); err != nil {
-		f.ShowError(err)
-		return
+		// Register Alias
+		if err := aliasgo.Register(node, listener); err != nil {
+			f.ShowError(err)
+			return
+		}
 	}
 
-	callback(node)
+	go callback(node)
 }
 
 func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bcgo.Node)) {
@@ -218,7 +225,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		alias := importKey.Alias.Text
 		access := importKey.Access.Text
 
-		// Display Progress Dialog
+		// Show Progress Dialog
 		progress := dialog.NewProgress("Importing", "Importing "+alias, f.Window)
 		progress.Show()
 		defer progress.Hide()
@@ -310,7 +317,7 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 					d.Hide()
 				}
 
-				// Display Progress Dialog
+				// Show Progress Dialog
 				progress := dialog.NewProgress("Exporting", "Exporting "+node.Alias, f.Window)
 				progress.Show()
 
