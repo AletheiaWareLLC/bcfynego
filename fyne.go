@@ -311,62 +311,13 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 	box := widget.NewVBox(
 		f.nodeUI(node),
 		widget.NewButton("Export Keys", func() {
-			authentication := account.NewAuthentication(node.Alias)
-			authentication.AuthenticateButton.OnTapped = func() {
-				if d := f.Dialog; d != nil {
-					d.Hide()
-				}
-
-				// Show Progress Dialog
-				progress := dialog.NewProgress("Exporting", "Exporting "+node.Alias, f.Window)
-				progress.Show()
-
-				password := []byte(authentication.Password.Text)
-				if len(password) < cryptogo.MIN_PASSWORD {
-					f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
-					return
-				}
-				access, err := client.ExportKeys(bcgo.GetBCWebsite(), node.Alias, password)
-				if err != nil {
-					f.ShowError(err)
-					return
-				}
-
-				progress.Hide()
-
-				form := widget.NewForm(
-					widget.NewFormItem("Alias", widget.NewLabel(node.Alias)),
-					widget.NewFormItem("Access Code", widget.NewLabel(access)),
-				)
-				dialog.ShowCustom("Export Keys", "OK", form, f.Window)
-				if c := f.OnKeysExported; c != nil {
-					go c(node.Alias)
-				}
-			}
-			dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
+			f.ExportKeys(client, node)
 		}),
 		widget.NewButton("Switch Keys", func() {
-			if d := f.Dialog; d != nil {
-				d.Hide()
-			}
-			client.Root = ""
-			client.Cache = nil
-			client.Network = nil
-			client.Node = nil
-			if c := f.OnSignedOut; c != nil {
-				go c()
-			}
+			f.SwitchKeys(client)
 		}),
 		widget.NewButton("Delete Keys", func() {
-			if d := f.Dialog; d != nil {
-				d.Hide()
-			}
-			f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
-			/* TODO
-			if c := f.OnSignedOut; c != nil {
-				go c()
-			}
-			*/
+			f.DeleteKeys(client, node)
 		}),
 	)
 	if d := f.Dialog; d != nil {
@@ -374,6 +325,62 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 	}
 	f.Dialog = dialog.NewCustom("Account", "OK", box, f.Window)
 	f.Dialog.Show()
+}
+
+func (f *BCFyne) DeleteKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
+	f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
+	/* TODO
+	if c := f.OnSignedOut; c != nil {
+		go c()
+	}
+	*/
+}
+
+func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
+	authentication := account.NewAuthentication(node.Alias)
+	authentication.AuthenticateButton.OnTapped = func() {
+		// Show Progress Dialog
+		progress := dialog.NewProgress("Exporting", "Exporting "+node.Alias, f.Window)
+		progress.Show()
+
+		password := []byte(authentication.Password.Text)
+		if len(password) < cryptogo.MIN_PASSWORD {
+			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			return
+		}
+		access, err := client.ExportKeys(bcgo.GetBCWebsite(), node.Alias, password)
+		if err != nil {
+			f.ShowError(err)
+			return
+		}
+
+		progress.Hide()
+
+		form := widget.NewForm(
+			widget.NewFormItem("Alias", widget.NewLabel(node.Alias)),
+			widget.NewFormItem("Access Code", container.NewHBox(
+				widget.NewLabel(access),
+				widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+					//TODO copy to clipboard
+				}),
+			)),
+		)
+		dialog.ShowCustom("Export Keys", "OK", form, f.Window)
+		if c := f.OnKeysExported; c != nil {
+			go c(node.Alias)
+		}
+	}
+	dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
+}
+
+func (f *BCFyne) SwitchKeys(client *bcclientgo.BCClient) {
+	client.Root = ""
+	client.Cache = nil
+	client.Network = nil
+	client.Node = nil
+	if c := f.OnSignedOut; c != nil {
+		go c()
+	}
 }
 
 func (f *BCFyne) ShowError(err error) {

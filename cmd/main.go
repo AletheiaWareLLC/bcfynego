@@ -93,13 +93,30 @@ func main() {
 				go f.ShowAccount(c)
 			}),
 			widget.NewButton("ShowAccessDialog", func() {
-				log.Println("// TODO go c.ShowAccessDialog()")
-			}),
-			widget.NewButton("ImportKeys", func() {
-				log.Println("// TODO go c.ImportKeys()")
+				go f.ShowAccessDialog(c, nil)
 			}),
 			widget.NewButton("ExportKeys", func() {
-				log.Println("// TODO go c.ExportKeys()")
+				go func() {
+					n, err := f.GetNode(c)
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						f.ExportKeys(c, n)
+					}
+				}()
+			}),
+			widget.NewButton("SwitchKeys", func() {
+				go f.SwitchKeys(c)
+			}),
+			widget.NewButton("DeleteKeys", func() {
+				go func() {
+					n, err := f.GetNode(c)
+					if err != nil {
+						f.ShowError(err)
+					} else {
+						f.DeleteKeys(c, n)
+					}
+				}()
 			}),
 		)),
 		widget.NewAccordionItem("ShowError", widget.NewButton("ShowError", func() {
@@ -150,7 +167,7 @@ func main() {
 				}()
 			}),
 			widget.NewButton("SetCache", func() {
-				log.Println("// TODO go go log.Println(c.SetCache())")
+				log.Println("// TODO go log.Println(c.SetCache())")
 			}),
 			widget.NewButton("Purge", func() {
 				log.Println("// TODO go c.Purge()")
@@ -163,12 +180,14 @@ func main() {
 					if err != nil {
 						f.ShowError(err)
 					} else {
+						// TODO show information in more structured UI
+						// - Peer Domain, Latency, Errors
 						log.Println(n)
 					}
 				}()
 			}),
 			widget.NewButton("SetNetwork", func() {
-				log.Println("// TODO go go log.Println(c.SetNetwork())")
+				log.Println("// TODO go log.Println(c.SetNetwork())")
 			}),
 			widget.NewButton("Pull", func() {
 				log.Println("// TODO go c.Pull()")
