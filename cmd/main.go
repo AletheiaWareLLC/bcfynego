@@ -17,17 +17,22 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
-	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/AletheiaWareLLC/bcclientgo"
 	"github.com/AletheiaWareLLC/bcfynego"
+	"github.com/AletheiaWareLLC/bcfynego/ui"
+	"github.com/AletheiaWareLLC/bcfynego/ui/data"
 	"github.com/AletheiaWareLLC/bcgo"
 	"log"
 	"os"
+	"strings"
 )
 
 var peer = flag.String("peer", "", "BC peer")
@@ -40,7 +45,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// Create Application
-	a := app.New()
+	a := app.NewWithID("com.aletheiaware.bc")
 
 	// Create Window
 	w := a.NewWindow("BC")
@@ -58,165 +63,149 @@ func main() {
 
 	logo := f.GetLogo()
 
-	w.SetContent(container.NewBorder(logo, nil, nil, nil, widget.NewScrollContainer(widget.NewAccordionContainer(
-		widget.NewAccordionItem("Node", widget.NewVBox(
-			widget.NewButton("Node", func() {
+	address := widget.NewEntry()
+	address.SetPlaceHolder("Channel")
+	block := ui.NewBlockView()
+
+	w.SetContent(container.NewBorder(logo, nil, nil, nil, container.NewBorder(
+		container.NewBorder(nil, nil, nil, widget.NewHBox(
+			widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
 				go func() {
-					n, err := f.GetNode(c)
+					parts := strings.Split(address.Text, "/")
+					channel := parts[0]
+					var blockhash []byte
+					if len(parts) > 1 {
+						bh, err := base64.RawURLEncoding.DecodeString(parts[1])
+						if err != nil {
+							f.ShowError(err)
+							return
+						}
+						blockhash = bh
+					}
+					cache, err := c.GetCache()
 					if err != nil {
 						f.ShowError(err)
-					} else {
-						f.ShowNode(n)
+						return
 					}
+					network, err := c.GetNetwork()
+					if err != nil {
+						f.ShowError(err)
+						return
+					}
+					if blockhash == nil {
+						ref, err := bcgo.GetHeadReference(channel, cache, network)
+						if err != nil {
+							f.ShowError(err)
+							return
+						}
+						blockhash = ref.BlockHash
+					}
+					block.SetHash(blockhash)
+					b, err := bcgo.GetBlock(channel, cache, network, blockhash)
+					if err != nil {
+						f.ShowError(err)
+						return
+					}
+					block.SetBlock(b)
 				}()
 			}),
-			widget.NewButton("NewNode", func() {
-				log.Println("// TODO go c.NewNode()")
-			}),
-			widget.NewButton("ExistingNode", func() {
-				log.Println("// TODO go c.ExistingNode()")
-			}),
-			widget.NewButton("SetNode", func() {
-				log.Println("// TODO go c.SetNode()")
-			}),
-		)),
-		widget.NewAccordionItem("Alias", widget.NewVBox(
-			widget.NewButton("Register", func() {
-				log.Println("// TODO go c.Register()")
-			}),
-			widget.NewButton("Alias", func() {
-				log.Println("// TODO go c.Alias()")
-			}),
-		)),
-		widget.NewAccordionItem("Account", widget.NewVBox(
-			widget.NewButton("ShowAccount", func() {
+
+			widget.NewButtonWithIcon("", data.NewPrimaryThemedResource(data.AccountIcon), func() {
 				go f.ShowAccount(c)
 			}),
-			widget.NewButton("ShowAccessDialog", func() {
-				go f.ShowAccessDialog(c, nil)
+			widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+				go settings(f, c)
 			}),
-			widget.NewButton("ExportKeys", func() {
-				go func() {
-					n, err := f.GetNode(c)
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						f.ExportKeys(c, n)
-					}
-				}()
-			}),
-			widget.NewButton("SwitchKeys", func() {
-				go f.SwitchKeys(c)
-			}),
-			widget.NewButton("DeleteKeys", func() {
-				go func() {
-					n, err := f.GetNode(c)
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						f.DeleteKeys(c, n)
-					}
-				}()
-			}),
-		)),
-		widget.NewAccordionItem("ShowError", widget.NewButton("ShowError", func() {
-			go f.ShowError(fmt.Errorf("Sample Error"))
-		})),
-		widget.NewAccordionItem("Root", widget.NewVBox(
-			widget.NewButton("GetRoot", func() {
-				go log.Println(c.GetRoot())
-			}),
-			widget.NewButton("SetRoot", func() {
-				log.Println("// TODO go log.Println(c.SetRoot())")
-			}),
-		)),
-		widget.NewAccordionItem("Peers", widget.NewVBox(
-			widget.NewButton("GetDefaultPeers", func() {
-				go func() {
-					ps, err := c.GetDefaultPeers()
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						log.Println(ps)
-					}
-				}()
-			}),
-			widget.NewButton("GetPeers", func() {
-				go func() {
-					ps, err := c.GetPeers()
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						log.Println(ps)
-					}
-				}()
-			}),
-			widget.NewButton("SetPeers", func() {
-				log.Println("// TODO go log.Println(c.SetPeers())")
-			}),
-		)),
-		widget.NewAccordionItem("Cache", widget.NewVBox(
-			widget.NewButton("GetCache", func() {
-				go func() {
-					ch, err := c.GetCache()
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						log.Println(ch)
-					}
-				}()
-			}),
-			widget.NewButton("SetCache", func() {
-				log.Println("// TODO go log.Println(c.SetCache())")
-			}),
-			widget.NewButton("Purge", func() {
-				log.Println("// TODO go c.Purge()")
-			}),
-		)),
-		widget.NewAccordionItem("Network", widget.NewVBox(
-			widget.NewButton("GetNetwork", func() {
-				go func() {
-					n, err := c.GetNetwork()
-					if err != nil {
-						f.ShowError(err)
-					} else {
-						// TODO show information in more structured UI
-						// - Peer Domain, Latency, Errors
-						log.Println(n)
-					}
-				}()
-			}),
-			widget.NewButton("SetNetwork", func() {
-				log.Println("// TODO go log.Println(c.SetNetwork())")
-			}),
-			widget.NewButton("Pull", func() {
-				log.Println("// TODO go c.Pull()")
-			}),
-			widget.NewButton("Push", func() {
-				log.Println("// TODO go c.Push()")
-			}),
-		)),
-		widget.NewAccordionItem("Channel", widget.NewVBox(
-			widget.NewButton("Head", func() {
-				log.Println("// TODO go c.Head()")
-			}), widget.NewButton("Block", func() {
-				log.Println("// TODO go c.Block()")
-			}), widget.NewButton("Record", func() {
-				log.Println("// TODO go c.Record()")
-			}), widget.NewButton("Read", func() {
-				log.Println("// TODO go c.Read()")
-			}), widget.NewButton("ReadKey", func() {
-				log.Println("// TODO go c.ReadKey()")
-			}), widget.NewButton("ReadPayload", func() {
-				log.Println("// TODO go c.ReadPayload()")
-			}), widget.NewButton("Write", func() {
-				log.Println("// TODO go c.Write()")
-			}), widget.NewButton("Mine", func() {
-				log.Println("// TODO go c.Mine()")
-			}),
-		)),
-	))))
+		), address),
+		nil,
+		nil,
+		nil,
+		widget.NewScrollContainer(block),
+	)))
 	w.Resize(fyne.NewSize(800, 600))
 	w.CenterOnScreen()
 	w.ShowAndRun()
+}
+
+func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
+	form := widget.NewForm()
+
+	root := ui.NewRootView(func() string {
+		r, err := c.GetRoot()
+		if err != nil {
+			f.ShowError(err)
+			return ""
+		}
+		return r
+	})
+	form.Append("Root", container.NewBorder(nil, nil, nil, widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
+		go func() {
+			c.SetRoot(root.Text)
+			root.Refresh()
+		}()
+	}), root))
+
+	peerList := &widget.List{
+		Length: func() int {
+			return len(c.Peers)
+		},
+		CreateItem: func() fyne.CanvasObject {
+			return container.NewBorder(nil, nil, nil, widget.NewButtonWithIcon("", theme.ContentRemoveIcon(), nil), widget.NewLabel(""))
+		},
+	}
+	peerList.UpdateItem = func(index widget.ListItemID, item fyne.CanvasObject) {
+		if index < 0 || index >= len(c.Peers) {
+			return
+		}
+		p := c.Peers[index]
+		os := item.(*fyne.Container).Objects
+		os[0].(*widget.Label).SetText(p)
+		os[1].(*widget.Button).OnTapped = func() {
+			c.SetPeers(append(c.Peers[:index], c.Peers[index+1:]...)...)
+			form.Refresh()
+		}
+	}
+	form.Append("Peers", widget.NewVBox(
+		peerList,
+		container.NewGridWithColumns(2,
+			widget.NewButton("Add", func() {
+				dialog.ShowEntryDialog("Add Peer", "Enter Peer Domain", func(peer string) {
+					c.SetPeers(append(c.Peers, peer)...)
+					form.Refresh()
+				}, f.Window)
+			}),
+			widget.NewButton("Reset", func() {
+				dialog.ShowConfirm("Reset Peers", "Reset peers to default", func(reset bool) {
+					if !reset {
+						return
+					}
+					c.SetPeers(bcgo.GetBCHost())
+					form.Refresh()
+				}, f.Window)
+			}),
+		),
+	))
+
+	form.Append("Cache", widget.NewVBox(
+		ui.NewCacheView(func() bcgo.Cache {
+			h, err := c.GetCache()
+			if err != nil {
+				f.ShowError(err)
+				return nil
+			}
+			return h
+		}),
+	))
+
+	form.Append("Network", widget.NewVBox(
+		ui.NewNetworkView(func() bcgo.Network {
+			n, err := c.GetNetwork()
+			if err != nil {
+				f.ShowError(err)
+				return nil
+			}
+			return n
+		}),
+	))
+	dialog.ShowCustom("Settings", "OK", form, f.Window)
 }

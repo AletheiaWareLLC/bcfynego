@@ -18,7 +18,6 @@ package bcfynego
 
 import (
 	"bytes"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"fyne.io/fyne"
@@ -94,7 +93,9 @@ func (f *BCFyne) ExistingNode(client *bcclientgo.BCClient, alias string, passwor
 		Channels: make(map[string]*bcgo.Channel),
 	}
 
-	callback(node)
+	if c := callback; c != nil {
+		c(node)
+	}
 }
 
 func (f *BCFyne) GetNode(client *bcclientgo.BCClient) (*bcgo.Node, error) {
@@ -172,7 +173,9 @@ func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []b
 		}
 	}
 
-	go callback(node)
+	if c := callback; c != nil {
+		c(node)
+	}
 }
 
 func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bcgo.Node)) {
@@ -201,15 +204,16 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
-		log.Println("Sign In Tapped")
 		alias := signIn.Alias.Text
 		password := []byte(signIn.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
 			return
 		}
 		f.ExistingNode(client, alias, password, func(node *bcgo.Node) {
-			callback(node)
+			if c := callback; c != nil {
+				c(node)
+			}
 			if c := f.OnSignedIn; c != nil {
 				go c(node)
 			}
@@ -219,14 +223,13 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
-		log.Println("Import Key Tapped")
 
 		host := bcgo.GetBCWebsite()
 		alias := importKey.Alias.Text
 		access := importKey.Access.Text
 
 		// Show Progress Dialog
-		progress := dialog.NewProgress("Importing", "Importing "+alias, f.Window)
+		progress := dialog.NewProgress("Importing", fmt.Sprintf("Importing %s from %s", alias, host), f.Window)
 		progress.Show()
 		defer progress.Hide()
 
@@ -242,7 +245,6 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
-		log.Println("Sign Up Tapped")
 		alias := signUp.Alias.Text
 		password := []byte(signUp.Password.Text)
 		confirm := []byte(signUp.Confirm.Text)
@@ -254,7 +256,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		}
 
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
 			return
 		}
 		if !bytes.Equal(password, confirm) {
@@ -262,7 +264,9 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			return
 		}
 		f.NewNode(client, alias, password, func(node *bcgo.Node) {
-			callback(node)
+			if c := callback; c != nil {
+				c(node)
+			}
 			if c := f.OnSignedUp; c != nil {
 				go c(node)
 			}
@@ -308,47 +312,52 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 		f.ShowError(err)
 		return
 	}
+	form, err := nodeView(node)
+	if err != nil {
+		f.ShowError(err)
+		return
+	}
 	box := widget.NewVBox(
-		f.nodeUI(node),
-		widget.NewButton("Export Keys", func() {
-			f.ExportKeys(client, node)
-		}),
-		widget.NewButton("Switch Keys", func() {
-			f.SwitchKeys(client)
-		}),
-		widget.NewButton("Delete Keys", func() {
-			f.DeleteKeys(client, node)
-		}),
+		form,
 	)
 	if d := f.Dialog; d != nil {
 		d.Hide()
 	}
 	f.Dialog = dialog.NewCustom("Account", "OK", box, f.Window)
+	box.Append(widget.NewButton("Export Keys", func() {
+		f.ExportKeys(client, node)
+	}))
+	box.Append(widget.NewButton("Switch Keys", func() {
+		f.Dialog.Hide()
+		f.SwitchKeys(client)
+		go f.ShowAccessDialog(client, nil)
+	}))
+	box.Append(widget.NewButton("Delete Keys", func() {
+		f.Dialog.Hide()
+		f.DeleteKeys(client, node)
+	}))
 	f.Dialog.Show()
 }
 
 func (f *BCFyne) DeleteKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
-	f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.Account.DeleteKeys"))
-	/* TODO
-	if c := f.OnSignedOut; c != nil {
-		go c()
-	}
-	*/
+	f.ShowError(fmt.Errorf("Not yet implemented: %s", "BCFyne.DeleteKeys"))
 }
 
 func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 	authentication := account.NewAuthentication(node.Alias)
 	authentication.AuthenticateButton.OnTapped = func() {
+		host := bcgo.GetBCWebsite()
+
 		// Show Progress Dialog
-		progress := dialog.NewProgress("Exporting", "Exporting "+node.Alias, f.Window)
+		progress := dialog.NewProgress("Exporting", fmt.Sprintf("Exporting %s to %s", node.Alias, host), f.Window)
 		progress.Show()
 
 		password := []byte(authentication.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(errors.New(fmt.Sprintf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)))
+			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
 			return
 		}
-		access, err := client.ExportKeys(bcgo.GetBCWebsite(), node.Alias, password)
+		access, err := client.ExportKeys(host, node.Alias, password)
 		if err != nil {
 			f.ShowError(err)
 			return
@@ -361,7 +370,8 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 			widget.NewFormItem("Access Code", container.NewHBox(
 				widget.NewLabel(access),
 				widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-					//TODO copy to clipboard
+					f.Window.Clipboard().SetContent(access)
+					dialog.ShowInformation("Copied", "Access code copied to clipboard", f.Window)
 				}),
 			)),
 		)
@@ -394,7 +404,11 @@ func (f *BCFyne) ShowError(err error) {
 }
 
 func (f *BCFyne) ShowNode(node *bcgo.Node) {
-	form := f.nodeUI(node)
+	form, err := nodeView(node)
+	if err != nil {
+		f.ShowError(err)
+		return
+	}
 	if d := f.Dialog; d != nil {
 		d.Hide()
 	}
@@ -402,27 +416,17 @@ func (f *BCFyne) ShowNode(node *bcgo.Node) {
 	f.Dialog.Show()
 }
 
-func (f *BCFyne) nodeUI(node *bcgo.Node) fyne.CanvasObject {
+func nodeView(node *bcgo.Node) (fyne.CanvasObject, error) {
 	publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
 	if err != nil {
-		f.ShowError(err)
-		return nil
+		return nil, err
 	}
 
-	publicKeyBase64 := base64.RawURLEncoding.EncodeToString(publicKeyBytes)
-	var publicKeyRunes []rune
-	for i, r := range []rune(publicKeyBase64) {
-		if i > 0 && i%64 == 0 {
-			publicKeyRunes = append(publicKeyRunes, '\n')
-		}
-		publicKeyRunes = append(publicKeyRunes, r)
-	}
-
-	aliasScroller := widget.NewHScrollContainer(widget.NewLabel(node.Alias))
-	publicKeyScroller := widget.NewHScrollContainer(widget.NewLabelWithStyle(string(publicKeyRunes), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
+	aliasScroller := widget.NewHScrollContainer(ui.NewAliasView(func() string { return node.Alias }))
+	publicKeyScroller := widget.NewHScrollContainer(ui.NewKeyView(func() []byte { return publicKeyBytes }))
 	publicKeyScroller.SetMinSize(fyne.NewSize(10*theme.TextSize(), 0))
 
-	form := widget.NewForm(
+	return widget.NewForm(
 		widget.NewFormItem(
 			"Alias",
 			aliasScroller,
@@ -431,6 +435,5 @@ func (f *BCFyne) nodeUI(node *bcgo.Node) fyne.CanvasObject {
 			"Public Key",
 			publicKeyScroller,
 		),
-	)
-	return form
+	), nil
 }
