@@ -195,6 +195,14 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 			}
 			return h
 		}),
+		widget.NewButton("Purge", func() {
+			go func() {
+				if err := c.Purge(); err != nil {
+					f.ShowError(err)
+					return
+				}
+			}()
+		}),
 	))
 
 	form.Append("Network", widget.NewVBox(
