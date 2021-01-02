@@ -17,11 +17,11 @@
 package ui
 
 import (
+	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
-	"github.com/AletheiaWareLLC/bcgo"
 )
 
 type BlockView struct {

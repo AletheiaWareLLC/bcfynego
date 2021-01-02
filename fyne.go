@@ -17,6 +17,13 @@
 package bcfynego
 
 import (
+	"aletheiaware.com/aliasgo"
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/ui"
+	"aletheiaware.com/bcfynego/ui/account"
+	"aletheiaware.com/bcfynego/ui/data"
+	"aletheiaware.com/bcgo"
+	"aletheiaware.com/cryptogo"
 	"bytes"
 	"errors"
 	"fmt"
@@ -26,13 +33,6 @@ import (
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/AletheiaWareLLC/aliasgo"
-	"github.com/AletheiaWareLLC/bcclientgo"
-	"github.com/AletheiaWareLLC/bcfynego/ui"
-	"github.com/AletheiaWareLLC/bcfynego/ui/account"
-	"github.com/AletheiaWareLLC/bcfynego/ui/data"
-	"github.com/AletheiaWareLLC/bcgo"
-	"github.com/AletheiaWareLLC/cryptogo"
 	"log"
 	"os"
 	"runtime/debug"

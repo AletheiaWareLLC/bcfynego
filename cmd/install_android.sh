@@ -17,13 +17,13 @@
 set -e
 set -x
 
-(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/ui/data/ && ./gen.sh)
-go fmt $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
-go vet $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
-go test $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/...
+(cd $GOPATH/src/aletheiaware.com/bcfynego/ui/data/ && ./gen.sh)
+go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
+go vet $GOPATH/src/aletheiaware.com/bcfynego/...
+go test $GOPATH/src/aletheiaware.com/bcfynego/...
 ANDROID_NDK_HOME=${ANDROID_HOME}/ndk-bundle/
-(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && fyne package -os android -appID com.aletheiaware.bc -icon $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/ui/data/logo.png -name BC_unaligned)
-(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk)
-(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb install -r -g BC.apk)
-#(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb logcat com.aletheiaware.bc:V org.golang.app:V *:S | tee android.log)
-(cd $GOPATH/src/github.com/AletheiaWareLLC/bcfynego/cmd && adb logcat -c && adb logcat | tee android.log)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd && fyne package -os android -appID com.aletheiaware.bc -icon $GOPATH/src/aletheiaware.com/bcfynego/ui/data/logo.png -name BC_unaligned)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd && adb install -r -g BC.apk)
+#(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd && adb logcat com.aletheiaware.bc:V org.golang.app:V *:S | tee android.log)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd && adb logcat -c && adb logcat | tee android.log)

@@ -17,9 +17,9 @@
 package ui
 
 import (
+	"aletheiaware.com/bcgo"
 	"fmt"
 	"fyne.io/fyne/widget"
-	"github.com/AletheiaWareLLC/bcgo"
 )
 
 type NetworkView struct {

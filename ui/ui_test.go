@@ -17,13 +17,13 @@
 package ui_test
 
 import (
+	"aletheiaware.com/bcfynego/ui/account"
+	"aletheiaware.com/bcfynego/ui/data"
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"github.com/AletheiaWareLLC/bcfynego/ui/account"
-	"github.com/AletheiaWareLLC/bcfynego/ui/data"
 	"testing"
 )
 

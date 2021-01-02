@@ -16,7 +16,7 @@
 
 package ui
 
-import "github.com/AletheiaWareLLC/bcgo"
+import "aletheiaware.com/bcgo"
 
 type ProgressMiningListener struct {
 	Func func(f float64)
