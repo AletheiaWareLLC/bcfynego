@@ -31,7 +31,6 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"log"
-	"os"
 	"strings"
 )
 
@@ -49,11 +48,6 @@ func main() {
 
 	// Create Window
 	w := a.NewWindow("BC")
-
-	// Set environment variable
-	if a.Settings().BuildType() == fyne.BuildRelease {
-		os.Setenv("LIVE", "true")
-	}
 
 	// Create BC Client
 	c := bcclientgo.NewBCClient(bcgo.SplitRemoveEmpty(*peer, ",")...)
