@@ -190,12 +190,18 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 			return h
 		}),
 		widget.NewButton("Purge", func() {
-			go func() {
-				if err := c.Purge(); err != nil {
-					f.ShowError(err)
+			dialog.ShowConfirm("Purge Cache", "Remove all data from cache?", func(reset bool) {
+				if !reset {
 					return
 				}
-			}()
+				go func() {
+					if err := c.Purge(); err != nil {
+						f.ShowError(err)
+						return
+					}
+				}()
+				form.Refresh()
+			}, f.Window)
 		}),
 	))
 
