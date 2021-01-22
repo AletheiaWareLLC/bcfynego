@@ -24,12 +24,12 @@ import (
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"flag"
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"log"
 	"strings"
 )
@@ -57,54 +57,58 @@ func main() {
 
 	logo := f.GetLogo()
 
+	block := ui.NewBlockView()
+	setAddressAction := func(address string) {
+		parts := strings.Split(address, "/")
+		channel := parts[0]
+		var blockhash []byte
+		if len(parts) > 1 {
+			bh, err := base64.RawURLEncoding.DecodeString(parts[1])
+			if err != nil {
+				f.ShowError(err)
+				return
+			}
+			blockhash = bh
+		}
+		cache, err := c.GetCache()
+		if err != nil {
+			f.ShowError(err)
+			return
+		}
+		network, err := c.GetNetwork()
+		if err != nil {
+			f.ShowError(err)
+			return
+		}
+		if blockhash == nil {
+			ref, err := bcgo.GetHeadReference(channel, cache, network)
+			if err != nil {
+				f.ShowError(err)
+				return
+			}
+			blockhash = ref.BlockHash
+		}
+		block.SetHash(blockhash)
+		b, err := bcgo.GetBlock(channel, cache, network, blockhash)
+		if err != nil {
+			f.ShowError(err)
+			return
+		}
+		block.SetBlock(b)
+	}
+
 	address := widget.NewEntry()
 	address.SetPlaceHolder("Channel")
-	block := ui.NewBlockView()
+	address.OnSubmitted = func(address string) {
+		go setAddressAction(address)
+	}
 
 	w.SetContent(container.NewBorder(logo, nil, nil, nil, container.NewBorder(
-		container.NewBorder(nil, nil, nil, widget.NewHBox(
+		container.NewBorder(nil, nil, nil, container.NewHBox(
 			widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
-				go func() {
-					parts := strings.Split(address.Text, "/")
-					channel := parts[0]
-					var blockhash []byte
-					if len(parts) > 1 {
-						bh, err := base64.RawURLEncoding.DecodeString(parts[1])
-						if err != nil {
-							f.ShowError(err)
-							return
-						}
-						blockhash = bh
-					}
-					cache, err := c.GetCache()
-					if err != nil {
-						f.ShowError(err)
-						return
-					}
-					network, err := c.GetNetwork()
-					if err != nil {
-						f.ShowError(err)
-						return
-					}
-					if blockhash == nil {
-						ref, err := bcgo.GetHeadReference(channel, cache, network)
-						if err != nil {
-							f.ShowError(err)
-							return
-						}
-						blockhash = ref.BlockHash
-					}
-					block.SetHash(blockhash)
-					b, err := bcgo.GetBlock(channel, cache, network, blockhash)
-					if err != nil {
-						f.ShowError(err)
-						return
-					}
-					block.SetBlock(b)
-				}()
+				go setAddressAction(address.Text)
 			}),
-
-			widget.NewButtonWithIcon("", data.NewPrimaryThemedResource(data.AccountIcon), func() {
+			widget.NewButtonWithIcon("", theme.NewThemedResource(data.AccountIcon), func() {
 				go f.ShowAccount(c)
 			}),
 			widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
@@ -114,7 +118,7 @@ func main() {
 		nil,
 		nil,
 		nil,
-		widget.NewScrollContainer(block),
+		container.NewScroll(block),
 	)))
 	w.Resize(fyne.NewSize(800, 600))
 	w.CenterOnScreen()
@@ -159,17 +163,23 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 			form.Refresh()
 		}
 	}
-	form.Append("Peers", widget.NewVBox(
+	form.Append("Peers", container.NewVBox(
 		peerList,
 		container.NewGridWithColumns(2,
 			widget.NewButton("Add", func() {
-				dialog.ShowEntryDialog("Add Peer", "Enter Peer Domain", func(peer string) {
-					c.SetPeers(append(c.Peers, peer)...)
-					form.Refresh()
+				entry := widget.NewEntry()
+				entry.SetPlaceHolder("Domain")
+				dialog.ShowForm("Add Peer", "Add", "Cancel", []*widget.FormItem{
+					widget.NewFormItem("Peer", entry),
+				}, func(ok bool) {
+					if ok {
+						c.SetPeers(append(c.Peers, entry.Text)...)
+						form.Refresh()
+					}
 				}, f.Window)
 			}),
 			widget.NewButton("Reset", func() {
-				dialog.ShowConfirm("Reset Peers", "Reset peers to default", func(reset bool) {
+				dialog.ShowConfirm("Reset Peers", "Reset peers to default?", func(reset bool) {
 					if !reset {
 						return
 					}
@@ -180,7 +190,7 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 		),
 	))
 
-	form.Append("Cache", widget.NewVBox(
+	form.Append("Cache", container.NewVBox(
 		ui.NewCacheView(func() bcgo.Cache {
 			h, err := c.GetCache()
 			if err != nil {
@@ -205,7 +215,7 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 		}),
 	))
 
-	form.Append("Network", widget.NewVBox(
+	form.Append("Network", container.NewVBox(
 		ui.NewNetworkView(func() bcgo.Network {
 			n, err := c.GetNetwork()
 			if err != nil {

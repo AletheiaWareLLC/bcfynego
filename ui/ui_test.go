@@ -19,11 +19,11 @@ package ui_test
 import (
 	"aletheiaware.com/bcfynego/ui/account"
 	"aletheiaware.com/bcfynego/ui/data"
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"testing"
 )
 
@@ -65,7 +65,7 @@ func Test_UI(t *testing.T) {
 		"logo": {
 			builder: func(w fyne.Window) fyne.CanvasObject {
 				img := &canvas.Image{
-					Resource: data.NewPrimaryThemedResource(data.Logo),
+					Resource: data.Logo,
 					FillMode: canvas.ImageFillOriginal,
 				}
 				img.SetMinSize(fyne.NewSize(26, 48))
@@ -76,7 +76,7 @@ func Test_UI(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			window := a.NewWindow(name)
 			object := tt.builder(window)
-			window.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), object))
+			window.SetContent(container.NewCenter(object))
 			window.Resize(object.MinSize().Max(fyne.NewSize(100, 100)))
 			test.AssertImageMatches(t, name+".png", window.Canvas().Capture())
 			window.Close()

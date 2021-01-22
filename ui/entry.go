@@ -19,9 +19,9 @@ package ui
 import (
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
-	"fyne.io/fyne"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 	"sort"
 )
 
@@ -30,14 +30,14 @@ type EntryView struct {
 	hash                 *widget.Label
 	timestamp            *widget.Label
 	creator              *widget.Label
-	access               *widget.Box
+	access               *fyne.Container
 	payload              *widget.Label
 	compressionAlgorithm *widget.Label
 	encryptionAlgorithm  *widget.Label
 	signature            *widget.Label
 	signatureAlgorithm   *widget.Label
-	reference            *widget.Box
-	meta                 *widget.Box
+	reference            *fyne.Container
+	meta                 *fyne.Container
 }
 
 func NewEntryView() *EntryView {
@@ -46,58 +46,63 @@ func NewEntryView() *EntryView {
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		timestamp: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		creator: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
-		access: widget.NewVBox(),
+		access: container.NewVBox(),
 		payload: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		compressionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		encryptionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		signature: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		signatureAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
-		reference: widget.NewVBox(),
-		meta:      widget.NewVBox(),
+		reference: container.NewVBox(),
+		meta:      container.NewVBox(),
 	}
 	v.ExtendBaseWidget(v)
 	v.hash.ExtendBaseWidget(v.hash)
 	v.timestamp.ExtendBaseWidget(v.timestamp)
 	v.creator.ExtendBaseWidget(v.creator)
-	v.access.ExtendBaseWidget(v.access)
 	v.payload.ExtendBaseWidget(v.payload)
 	v.compressionAlgorithm.ExtendBaseWidget(v.compressionAlgorithm)
 	v.encryptionAlgorithm.ExtendBaseWidget(v.encryptionAlgorithm)
 	v.signature.ExtendBaseWidget(v.signature)
 	v.signatureAlgorithm.ExtendBaseWidget(v.signatureAlgorithm)
-	v.reference.ExtendBaseWidget(v.reference)
-	v.meta.ExtendBaseWidget(v.meta)
 	v.Append("Hash", v.hash)
 	v.Append("Timestamp", v.timestamp)
 	v.Append("Creator", v.creator)
@@ -139,7 +144,7 @@ func (v *EntryView) SetRecord(entry *bcgo.Record) {
 		v.SetAccess(a)
 		accesses = append(accesses, v)
 	}
-	v.access.Children = accesses
+	v.access.Objects = accesses
 	v.access.Refresh()
 	v.payload.SetText(base64.RawURLEncoding.EncodeToString(entry.Payload))
 	v.compressionAlgorithm.SetText(entry.CompressionAlgorithm.String())
@@ -152,7 +157,7 @@ func (v *EntryView) SetRecord(entry *bcgo.Record) {
 		v.SetReference(r)
 		references = append(references, v)
 	}
-	v.reference.Children = references
+	v.reference.Objects = references
 	v.reference.Refresh()
 	keys := make([]string, len(entry.Meta))
 	i := 0
@@ -178,7 +183,7 @@ func (v *EntryView) SetRecord(entry *bcgo.Record) {
 			},
 		))
 	}
-	v.meta.Children = metas
+	v.meta.Objects = metas
 	v.meta.Refresh()
 	if v.Visible() {
 		v.Refresh()

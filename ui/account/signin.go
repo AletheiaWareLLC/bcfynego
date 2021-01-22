@@ -17,9 +17,10 @@
 package account
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
 )
 
 type SignIn struct {
@@ -30,22 +31,20 @@ type SignIn struct {
 
 func NewSignIn() *SignIn {
 	s := &SignIn{
-		Alias:    widget.NewSelectEntry([]string{}),
-		Password: widget.NewPasswordEntry(),
-		SignInButton: &widget.Button{
-			Style: widget.PrimaryButton,
-			Text:  "Sign In",
-		},
+		Alias:        widget.NewSelectEntry([]string{}),
+		Password:     widget.NewPasswordEntry(),
+		SignInButton: widget.NewButton("Sign In", nil),
 	}
-	s.Alias.SetPlaceHolder("Alias")
-	s.Password.SetPlaceHolder("Password")
-	// TODO Alias is single line, handle enter key by moving to password
-	// TODO Password is single line, handle enter key by moving to button/auto click
+	s.Alias.PlaceHolder = "Alias"
+	s.Alias.Wrapping = fyne.TextWrapOff
+	s.Password.PlaceHolder = "Password"
+	s.Password.Wrapping = fyne.TextWrapOff
+	s.SignInButton.Importance = widget.HighImportance
 	return s
 }
 
 func (s *SignIn) CanvasObject() fyne.CanvasObject {
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(1),
+	return container.NewGridWithColumns(1,
 		s.Alias,
 		s.Password,
 		layout.NewSpacer(),

@@ -19,8 +19,8 @@ package ui
 import (
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 type AccessView struct {
@@ -36,16 +36,19 @@ func NewAccessView() *AccessView {
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		secretKey: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		encryptionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 	}
 	v.ExtendBaseWidget(v)

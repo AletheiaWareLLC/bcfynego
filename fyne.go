@@ -27,12 +27,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"log"
 	"os"
 	"runtime/debug"
@@ -111,7 +111,7 @@ func (f *BCFyne) GetNode(client *bcclientgo.BCClient) (*bcgo.Node, error) {
 
 func (f *BCFyne) GetLogo() fyne.CanvasObject {
 	return &canvas.Image{
-		Resource: data.NewPrimaryThemedResource(data.Logo),
+		Resource: data.Logo,
 		//FillMode: canvas.ImageFillContain,
 		FillMode: canvas.ImageFillOriginal,
 	}
@@ -191,7 +191,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
 	f.Dialog = dialog.NewCustom("Account Access", "Cancel",
 		container.NewVBox(
-			widget.NewAccordionContainer(
+			widget.NewAccordion(
 				&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
 				widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
 				widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
@@ -200,7 +200,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		),
 		f.Window)
 
-	signIn.SignInButton.OnTapped = func() {
+	signInAction := func() {
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
@@ -219,7 +219,14 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			}
 		})
 	}
-	importKey.ImportKeyButton.OnTapped = func() {
+	signIn.Alias.OnSubmitted = func(string) {
+		f.Window.Canvas().Focus(signIn.Password)
+	}
+	signIn.Password.OnSubmitted = func(string) {
+		signInAction()
+	}
+	signIn.SignInButton.OnTapped = signInAction
+	importKeyAction := func() {
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
@@ -241,7 +248,14 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			go c(alias)
 		}
 	}
-	signUp.SignUpButton.OnTapped = func() {
+	importKey.Alias.OnSubmitted = func(string) {
+		f.Window.Canvas().Focus(importKey.Access)
+	}
+	importKey.Access.OnSubmitted = func(string) {
+		importKeyAction()
+	}
+	importKey.ImportKeyButton.OnTapped = importKeyAction
+	signUpAction := func() {
 		if d := f.Dialog; d != nil {
 			d.Hide()
 		}
@@ -272,6 +286,17 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			}
 		})
 	}
+	signUp.Alias.OnSubmitted = func(string) {
+		f.Window.Canvas().Focus(signUp.Password)
+	}
+	signUp.Password.OnSubmitted = func(string) {
+		f.Window.Canvas().Focus(signUp.Confirm)
+	}
+	signUp.Confirm.OnSubmitted = func(string) {
+		signUpAction()
+	}
+
+	signUp.SignUpButton.OnTapped = signUpAction
 
 	rootDir, err := client.GetRoot()
 	if err != nil {
@@ -317,22 +342,22 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 		f.ShowError(err)
 		return
 	}
-	box := widget.NewVBox(
+	box := container.NewVBox(
 		form,
 	)
 	if d := f.Dialog; d != nil {
 		d.Hide()
 	}
 	f.Dialog = dialog.NewCustom("Account", "OK", box, f.Window)
-	box.Append(widget.NewButton("Export Keys", func() {
+	box.Add(widget.NewButton("Export Keys", func() {
 		f.ExportKeys(client, node)
 	}))
-	box.Append(widget.NewButton("Switch Keys", func() {
+	box.Add(widget.NewButton("Switch Keys", func() {
 		f.Dialog.Hide()
 		f.SwitchKeys(client)
 		go f.ShowAccessDialog(client, nil)
 	}))
-	box.Append(widget.NewButton("Delete Keys", func() {
+	box.Add(widget.NewButton("Delete Keys", func() {
 		f.Dialog.Hide()
 		f.DeleteKeys(client, node)
 	}))
@@ -345,7 +370,7 @@ func (f *BCFyne) DeleteKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 
 func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 	authentication := account.NewAuthentication(node.Alias)
-	authentication.AuthenticateButton.OnTapped = func() {
+	authenticateAction := func() {
 		host := bcgo.GetBCWebsite()
 
 		// Show Progress Dialog
@@ -380,6 +405,10 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 			go c(node.Alias)
 		}
 	}
+	authentication.Password.OnSubmitted = func(string) {
+		authenticateAction()
+	}
+	authentication.AuthenticateButton.OnTapped = authenticateAction
 	dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
 }
 
@@ -422,8 +451,8 @@ func nodeView(node *bcgo.Node) (fyne.CanvasObject, error) {
 		return nil, err
 	}
 
-	aliasScroller := widget.NewHScrollContainer(ui.NewAliasView(func() string { return node.Alias }))
-	publicKeyScroller := widget.NewHScrollContainer(ui.NewKeyView(func() []byte { return publicKeyBytes }))
+	aliasScroller := container.NewHScroll(ui.NewAliasView(func() string { return node.Alias }))
+	publicKeyScroller := container.NewHScroll(ui.NewKeyView(func() []byte { return publicKeyBytes }))
 	publicKeyScroller.SetMinSize(fyne.NewSize(10*theme.TextSize(), 0))
 
 	return widget.NewForm(

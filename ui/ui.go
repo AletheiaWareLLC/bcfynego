@@ -17,7 +17,7 @@
 package ui
 
 import (
-	"fyne.io/fyne"
+	"fyne.io/fyne/v2"
 )
 
 func ShortcutFocused(s fyne.Shortcut, w fyne.Window) {

@@ -20,8 +20,8 @@ import (
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"fmt"
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 type ReferenceView struct {
@@ -39,26 +39,31 @@ func NewReferenceView() *ReferenceView {
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		channel: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		block: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		record: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		index: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 	}
 	v.ExtendBaseWidget(v)

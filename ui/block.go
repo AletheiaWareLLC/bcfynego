@@ -20,8 +20,9 @@ import (
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"fmt"
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
 type BlockView struct {
@@ -33,7 +34,7 @@ type BlockView struct {
 	previous  *widget.Label
 	miner     *widget.Label
 	nonce     *widget.Label
-	entry     *widget.Box
+	entry     *fyne.Container
 }
 
 func NewBlockView() *BlockView {
@@ -42,38 +43,45 @@ func NewBlockView() *BlockView {
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		timestamp: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		channel: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		length: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		previous: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		miner: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
 		nonce: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
+			Wrapping: fyne.TextTruncate,
 		},
-		entry: widget.NewVBox(),
+		entry: container.NewVBox(),
 	}
 	v.ExtendBaseWidget(v)
 	v.hash.ExtendBaseWidget(v.hash)
@@ -83,7 +91,6 @@ func NewBlockView() *BlockView {
 	v.previous.ExtendBaseWidget(v.previous)
 	v.miner.ExtendBaseWidget(v.miner)
 	v.nonce.ExtendBaseWidget(v.nonce)
-	v.entry.ExtendBaseWidget(v.entry)
 	v.Append("Hash", v.hash)
 	v.Append("Timestamp", v.timestamp)
 	v.Append("Channel", v.channel)
@@ -127,7 +134,7 @@ func (v *BlockView) SetBlock(block *bcgo.Block) {
 		v.SetRecord(e.Record)
 		entries = append(entries, v)
 	}
-	v.entry.Children = entries
+	v.entry.Objects = entries
 	v.entry.Refresh()
 	if v.Visible() {
 		v.Refresh()

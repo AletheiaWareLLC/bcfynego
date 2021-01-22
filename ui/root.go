@@ -17,7 +17,8 @@
 package ui
 
 import (
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 type RootView struct {
@@ -29,6 +30,7 @@ func NewRootView(updater func() string) *RootView {
 	v := &RootView{
 		updater: updater,
 	}
+	v.Wrapping = fyne.TextTruncate
 	v.ExtendBaseWidget(v)
 	v.update()
 	return v

@@ -18,8 +18,8 @@ package ui
 
 import (
 	"encoding/base64"
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 type KeyView struct {
@@ -32,6 +32,7 @@ func NewKeyView(updater func() []byte) *KeyView {
 		Label: widget.Label{
 			Alignment: fyne.TextAlignLeading,
 			TextStyle: fyne.TextStyle{Monospace: true},
+			Wrapping:  fyne.TextTruncate,
 		},
 		updater: updater,
 	}

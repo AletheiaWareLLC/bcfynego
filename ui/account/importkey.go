@@ -17,9 +17,10 @@
 package account
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
 )
 
 type ImportKey struct {
@@ -30,22 +31,20 @@ type ImportKey struct {
 
 func NewImportKey() *ImportKey {
 	i := &ImportKey{
-		Alias:  widget.NewEntry(),
-		Access: widget.NewEntry(),
-		ImportKeyButton: &widget.Button{
-			Style: widget.PrimaryButton,
-			Text:  "Import Key",
-		},
+		Alias:           widget.NewEntry(),
+		Access:          widget.NewEntry(),
+		ImportKeyButton: widget.NewButton("Import Key", nil),
 	}
-	i.Alias.SetPlaceHolder("Alias")
-	i.Access.SetPlaceHolder("Access Code")
-	// TODO Alias is single line, handle enter key by moving to password
-	// TODO Access is single line, handle enter key by moving to button/auto click
+	i.Alias.PlaceHolder = "Alias"
+	i.Alias.Wrapping = fyne.TextWrapOff
+	i.Access.PlaceHolder = "Access Code"
+	i.Access.Wrapping = fyne.TextWrapOff
+	i.ImportKeyButton.Importance = widget.HighImportance
 	return i
 }
 
 func (i *ImportKey) CanvasObject() fyne.CanvasObject {
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(1),
+	return container.NewGridWithColumns(1,
 		i.Alias,
 		i.Access,
 		layout.NewSpacer(),

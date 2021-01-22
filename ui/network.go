@@ -19,7 +19,8 @@ package ui
 import (
 	"aletheiaware.com/bcgo"
 	"fmt"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 type NetworkView struct {
@@ -31,6 +32,7 @@ func NewNetworkView(updater func() bcgo.Network) *NetworkView {
 	v := &NetworkView{
 		updater: updater,
 	}
+	v.Wrapping = fyne.TextTruncate
 	v.ExtendBaseWidget(v)
 	v.update()
 	return v
