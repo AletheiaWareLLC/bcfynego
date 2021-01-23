@@ -120,7 +120,7 @@ func main() {
 		nil,
 		container.NewScroll(block),
 	)))
-	w.Resize(fyne.NewSize(800, 600))
+	w.Resize(ui.WindowSize)
 	w.CenterOnScreen()
 	w.ShowAndRun()
 }

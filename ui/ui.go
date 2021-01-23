@@ -20,6 +20,11 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+var (
+	DialogSize = fyne.NewSize(400, 300)
+	WindowSize = fyne.NewSize(800, 600)
+)
+
 func ShortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)

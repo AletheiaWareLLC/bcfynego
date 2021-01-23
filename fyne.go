@@ -329,6 +329,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	}
 
 	f.Dialog.Show()
+	f.Dialog.Resize(ui.DialogSize)
 }
 
 func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
@@ -362,6 +363,7 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 		f.DeleteKeys(client, node)
 	}))
 	f.Dialog.Show()
+	f.Dialog.Resize(ui.DialogSize)
 }
 
 func (f *BCFyne) DeleteKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
@@ -371,6 +373,10 @@ func (f *BCFyne) DeleteKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 	authentication := account.NewAuthentication(node.Alias)
 	authenticateAction := func() {
+		if d := f.Dialog; d != nil {
+			d.Hide()
+		}
+
 		host := bcgo.GetBCWebsite()
 
 		// Show Progress Dialog
@@ -400,7 +406,10 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 				}),
 			)),
 		)
-		dialog.ShowCustom("Export Keys", "OK", form, f.Window)
+		f.Dialog = dialog.NewCustom("Keys Exported", "OK", form, f.Window)
+		f.Dialog.Show()
+		f.Dialog.Resize(ui.DialogSize)
+
 		if c := f.OnKeysExported; c != nil {
 			go c(node.Alias)
 		}
@@ -409,7 +418,9 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 		authenticateAction()
 	}
 	authentication.AuthenticateButton.OnTapped = authenticateAction
-	dialog.ShowCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
+	f.Dialog = dialog.NewCustom("Account", "Cancel", authentication.CanvasObject(), f.Window)
+	f.Dialog.Show()
+	f.Dialog.Resize(ui.DialogSize)
 }
 
 func (f *BCFyne) SwitchKeys(client *bcclientgo.BCClient) {
