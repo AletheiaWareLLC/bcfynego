@@ -16,10 +16,7 @@
 
 package ui
 
-import (
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/widget"
-)
+import "fyne.io/fyne/v2/widget"
 
 type AliasView struct {
 	widget.Label
@@ -30,7 +27,6 @@ func NewAliasView(updater func() string) *AliasView {
 	v := &AliasView{
 		updater: updater,
 	}
-	v.Wrapping = fyne.TextTruncate
 	v.ExtendBaseWidget(v)
 	v.update()
 	return v

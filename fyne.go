@@ -473,8 +473,8 @@ func nodeView(node *bcgo.Node) (fyne.CanvasObject, error) {
 	}
 
 	aliasScroller := container.NewHScroll(ui.NewAliasView(func() string { return node.Alias }))
-	publicKeyScroller := container.NewHScroll(ui.NewKeyView(func() []byte { return publicKeyBytes }))
-	publicKeyScroller.SetMinSize(fyne.NewSize(10*theme.TextSize(), 0))
+	publicKeyScroller := container.NewVScroll(ui.NewKeyView(func() []byte { return publicKeyBytes }))
+	publicKeyScroller.SetMinSize(fyne.NewSize(0, 10*theme.TextSize())) // Show at least 10 lines
 
 	return widget.NewForm(
 		widget.NewFormItem(

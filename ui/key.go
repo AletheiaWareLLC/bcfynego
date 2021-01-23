@@ -32,7 +32,7 @@ func NewKeyView(updater func() []byte) *KeyView {
 		Label: widget.Label{
 			Alignment: fyne.TextAlignLeading,
 			TextStyle: fyne.TextStyle{Monospace: true},
-			Wrapping:  fyne.TextTruncate,
+			Wrapping:  fyne.TextWrapBreak,
 		},
 		updater: updater,
 	}
@@ -49,15 +49,7 @@ func (v *KeyView) Refresh() {
 func (v *KeyView) update() {
 	if u := v.updater; u != nil {
 		if bytes := u(); len(bytes) != 0 {
-			base := base64.RawURLEncoding.EncodeToString(bytes)
-			var publicKeyRunes []rune
-			for i, v := range []rune(base) {
-				if i > 0 && i%64 == 0 {
-					publicKeyRunes = append(publicKeyRunes, '\n')
-				}
-				publicKeyRunes = append(publicKeyRunes, v)
-			}
-			v.Text = string(publicKeyRunes)
+			v.Text = base64.RawURLEncoding.EncodeToString(bytes)
 		}
 	}
 }
