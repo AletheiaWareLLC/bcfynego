@@ -238,19 +238,51 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		// Show Progress Dialog
 		progress := dialog.NewProgress("Importing Keys", fmt.Sprintf("Importing %s from %s", alias, host), f.Window)
 		progress.Show()
-		defer progress.Hide()
 
-		if err := client.ImportKeys(host, alias, access); err != nil {
+		err := client.ImportKeys(host, alias, access)
+
+		progress.Hide()
+
+		if err != nil {
 			f.ShowError(err)
 			return
 		}
 
-		// Show Success Dialog
-		dialog.ShowInformation("Keys Imported", fmt.Sprintf("Keys for %s successfully imported from %s", alias, host), f.Window)
-
 		if c := f.OnKeysImported; c != nil {
 			go c(alias)
 		}
+
+		authentication := account.NewAuthentication(alias)
+		authenticateAction := func() {
+			if d := f.Dialog; d != nil {
+				d.Hide()
+			}
+			password := []byte(authentication.Password.Text)
+			if len(password) < cryptogo.MIN_PASSWORD {
+				f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
+				return
+			}
+			f.ExistingNode(client, alias, password, func(node *bcgo.Node) {
+				if c := callback; c != nil {
+					c(node)
+				}
+				if c := f.OnSignedIn; c != nil {
+					go c(node)
+				}
+			})
+		}
+		authentication.Password.OnSubmitted = func(string) {
+			authenticateAction()
+		}
+		authentication.AuthenticateButton.OnTapped = authenticateAction
+
+		// Show Success Dialog
+		f.Dialog = dialog.NewCustom("Keys Imported", "Cancel",
+			container.NewVBox(
+				widget.NewLabel(fmt.Sprintf("Keys for %s successfully imported from %s.\nAuthenticate to continue", alias, host)),
+				authentication.CanvasObject()), f.Window)
+		f.Dialog.Show()
+		f.Dialog.Resize(ui.DialogSize)
 	}
 	importKey.Alias.OnSubmitted = func(string) {
 		f.Window.Canvas().Focus(importKey.Access)
