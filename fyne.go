@@ -236,7 +236,7 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 		access := importKey.Access.Text
 
 		// Show Progress Dialog
-		progress := dialog.NewProgress("Importing", fmt.Sprintf("Importing %s from %s", alias, host), f.Window)
+		progress := dialog.NewProgress("Importing Keys", fmt.Sprintf("Importing %s from %s", alias, host), f.Window)
 		progress.Show()
 		defer progress.Hide()
 
@@ -244,6 +244,10 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			f.ShowError(err)
 			return
 		}
+
+		// Show Success Dialog
+		dialog.ShowInformation("Keys Imported", fmt.Sprintf("Keys for %s successfully imported from %s", alias, host), f.Window)
+
 		if c := f.OnKeysImported; c != nil {
 			go c(alias)
 		}
@@ -380,21 +384,27 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 		host := bcgo.GetBCWebsite()
 
 		// Show Progress Dialog
-		progress := dialog.NewProgress("Exporting", fmt.Sprintf("Exporting %s to %s", node.Alias, host), f.Window)
+		progress := dialog.NewProgress("Exporting Keys", fmt.Sprintf("Exporting %s to %s", node.Alias, host), f.Window)
 		progress.Show()
+
+		var (
+			access string
+			err    error
+		)
 
 		password := []byte(authentication.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
-			return
+			err = fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)
+		} else {
+			access, err = client.ExportKeys(host, node.Alias, password)
 		}
-		access, err := client.ExportKeys(host, node.Alias, password)
+
+		progress.Hide()
+
 		if err != nil {
 			f.ShowError(err)
 			return
 		}
-
-		progress.Hide()
 
 		form := widget.NewForm(
 			widget.NewFormItem("Alias", widget.NewLabel(node.Alias)),
