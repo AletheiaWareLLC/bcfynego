@@ -17,53 +17,60 @@
 package ui
 
 import (
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"strconv"
 )
 
 type ReferenceView struct {
 	widget.Form
-	timestamp *widget.Label
-	channel   *widget.Label
-	block     *widget.Label
-	record    *widget.Label
+	ui        UI
+	client    *bcclientgo.BCClient
+	timestamp *TimestampLabel
+	channel   *Link
+	block     *Link
+	record    *Link
 	index     *widget.Label
 }
 
-func NewReferenceView() *ReferenceView {
+func NewReferenceView(ui UI, client *bcclientgo.BCClient) *ReferenceView {
 	v := &ReferenceView{
-		timestamp: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		ui:        ui,
+		client:    client,
+		timestamp: NewTimestampLabel(0),
+		channel: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
 		},
-		channel: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		block: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
 		},
-		block: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		record: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
-		},
-		record: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
-			},
-			Wrapping: fyne.TextTruncate,
 		},
 		index: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 	}
 	v.ExtendBaseWidget(v)
@@ -77,23 +84,23 @@ func NewReferenceView() *ReferenceView {
 	v.Append("Block", v.block)
 	v.Append("Record", v.record)
 	v.Append("Index", v.index)
-	v.Hide()
 	return v
 }
 
 func (v *ReferenceView) SetReference(reference *bcgo.Reference) {
-	if reference == nil {
-		v.Hide()
-		return
-	}
-	v.timestamp.SetText(bcgo.TimestampToString(reference.Timestamp))
+	v.timestamp.SetTimestamp(reference.Timestamp)
 	v.channel.SetText(reference.ChannelName)
-	v.block.SetText(base64.RawURLEncoding.EncodeToString(reference.BlockHash))
-	v.record.SetText(base64.RawURLEncoding.EncodeToString(reference.RecordHash))
-	v.index.SetText(fmt.Sprintf("%d", reference.Index))
-	if v.Visible() {
-		v.Refresh()
-	} else {
-		v.Show()
+	v.channel.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewChannelURI(reference.ChannelName))
 	}
+	v.block.SetText(base64.RawURLEncoding.EncodeToString(reference.BlockHash))
+	v.block.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewBlockURI(reference.ChannelName, reference.BlockHash))
+	}
+	v.record.SetText(base64.RawURLEncoding.EncodeToString(reference.RecordHash))
+	v.record.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewRecordURI(reference.ChannelName, reference.BlockHash, reference.RecordHash))
+	}
+	v.index.SetText(strconv.FormatUint(reference.Index, 10))
+	v.Refresh()
 }

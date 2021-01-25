@@ -23,8 +23,6 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"image/color"
-	"log"
 )
 
 var _ desktop.Cursorable = (*FilePicker)(nil)
@@ -60,7 +58,6 @@ func (r *FilePicker) Cursor() desktop.Cursor {
 }
 
 func (r *FilePicker) Tapped(*fyne.PointEvent) {
-	log.Println("FilePicker.Tapped")
 	// Show open file dialog
 	dialog.ShowFileOpen(func(reader fyne.URIReadCloser, err error) {
 		if err != nil {
@@ -81,10 +78,6 @@ var _ fyne.WidgetRenderer = (*filePickerRenderer)(nil)
 type filePickerRenderer struct {
 	entry *widget.Entry
 	icon  *canvas.Image
-}
-
-func (r *filePickerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (r *filePickerRenderer) Destroy() {

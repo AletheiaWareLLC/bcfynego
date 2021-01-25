@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Aletheia Ware LLC
+ * Copyright 2021 Aletheia Ware LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,27 @@ package ui
 
 import (
 	"aletheiaware.com/bcgo"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
 
-type CacheView struct {
+type TimestampLabel struct {
 	widget.Label
-	updater func() bcgo.Cache
 }
 
-func NewCacheView(updater func() bcgo.Cache) *CacheView {
-	v := &CacheView{
-		updater: updater,
+func NewTimestampLabel(timestamp uint64) *TimestampLabel {
+	t := &TimestampLabel{
+		Label: widget.Label{
+			Alignment: fyne.TextAlignLeading,
+			TextStyle: fyne.TextStyle{Monospace: true},
+			Wrapping:  fyne.TextWrapBreak,
+		},
 	}
-	v.Wrapping = fyne.TextWrapBreak
-	v.ExtendBaseWidget(v)
-	v.update()
-	return v
+	t.ExtendBaseWidget(t)
+	t.SetTimestamp(timestamp)
+	return t
 }
 
-func (v *CacheView) Refresh() {
-	v.update()
-	v.Label.Refresh()
+func (t *TimestampLabel) SetTimestamp(timestamp uint64) {
+	t.SetText(bcgo.TimestampToString(timestamp))
 }
-
-func (v *CacheView) update() {
-	if u := v.updater; u != nil {
-		if c := u(); c != nil {
-			v.Text = fmt.Sprintf("%T %v", c, c)
-		}
-	}
-}
-
-// TODO show information in more structured UI
-// - Heads
-// - Blocks
-// - BlockEntries
-// - Mappings

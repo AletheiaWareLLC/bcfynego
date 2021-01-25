@@ -17,6 +17,8 @@
 package ui
 
 import (
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"fmt"
@@ -27,61 +29,66 @@ import (
 
 type BlockView struct {
 	widget.Form
+	ui        UI
+	client    *bcclientgo.BCClient
 	hash      *widget.Label
-	timestamp *widget.Label
-	channel   *widget.Label
+	timestamp *TimestampLabel
+	channel   *Link
 	length    *widget.Label
-	previous  *widget.Label
-	miner     *widget.Label
+	previous  *Link
+	miner     *Link
 	nonce     *widget.Label
-	entry     *fyne.Container
+	record    *fyne.Container
 }
 
-func NewBlockView() *BlockView {
+func NewBlockView(ui UI, client *bcclientgo.BCClient) *BlockView {
 	v := &BlockView{
+		ui:     ui,
+		client: client,
 		hash: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
-		timestamp: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		timestamp: NewTimestampLabel(0),
+		channel: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
-		},
-		channel: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
-			},
-			Wrapping: fyne.TextTruncate,
 		},
 		length: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
-		previous: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		previous: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
 		},
-		miner: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		miner: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
 		},
 		nonce: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
-		entry: container.NewVBox(),
+		record: container.NewVBox(),
 	}
 	v.ExtendBaseWidget(v)
 	v.hash.ExtendBaseWidget(v.hash)
@@ -98,47 +105,58 @@ func NewBlockView() *BlockView {
 	v.Append("Previous", v.previous)
 	v.Append("Miner", v.miner)
 	v.Append("Nonce", v.nonce)
-	v.Append("Entries", v.entry)
-	v.Hide()
+	v.Append("Records", v.record)
 	return v
 }
 
+func (v *BlockView) SetURI(uri storage.BlockURI) error {
+	cache, err := v.client.GetCache()
+	if err != nil {
+		return err
+	}
+	network, err := v.client.GetNetwork()
+	if err != nil {
+		return err
+	}
+	name := uri.Channel()
+	hash := uri.BlockHash()
+	block, err := bcgo.GetBlock(name, cache, network, hash)
+	if err != nil {
+		return err
+	}
+	v.SetHash(hash)
+	v.SetBlock(block)
+	return nil
+}
+
 func (v *BlockView) SetHash(hash []byte) {
-	if hash == nil {
-		v.Hide()
-		return
-	}
 	v.hash.SetText(base64.RawURLEncoding.EncodeToString(hash))
-	if v.Visible() {
-		v.Refresh()
-	} else {
-		v.Show()
-	}
 }
 
 func (v *BlockView) SetBlock(block *bcgo.Block) {
-	if block == nil {
-		v.Hide()
-		return
-	}
-	v.timestamp.SetText(bcgo.TimestampToString(block.Timestamp))
+	v.timestamp.SetTimestamp(block.Timestamp)
 	v.channel.SetText(block.ChannelName)
+	v.channel.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewChannelURI(block.ChannelName))
+	}
 	v.length.SetText(fmt.Sprintf("%d", block.Length))
 	v.previous.SetText(base64.RawURLEncoding.EncodeToString(block.Previous))
+	v.previous.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewBlockURI(block.ChannelName, block.Previous))
+	}
 	v.miner.SetText(block.Miner)
+	v.miner.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewAliasURI(block.Miner))
+	}
 	v.nonce.SetText(fmt.Sprintf("%d", block.Nonce))
-	var entries []fyne.CanvasObject
+	var records []fyne.CanvasObject
 	for _, e := range block.Entry {
-		v := NewEntryView()
+		v := NewRecordView(v.ui, v.client)
 		v.SetHash(e.RecordHash)
 		v.SetRecord(e.Record)
-		entries = append(entries, v)
+		records = append(records, v)
 	}
-	v.entry.Objects = entries
-	v.entry.Refresh()
-	if v.Visible() {
-		v.Refresh()
-	} else {
-		v.Show()
-	}
+	v.record.Objects = records
+	v.record.Refresh()
+	v.Refresh()
 }

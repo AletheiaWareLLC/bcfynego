@@ -17,7 +17,9 @@
 package ui
 
 import (
+	"aletheiaware.com/bcclientgo"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 )
 
 var (
@@ -25,8 +27,24 @@ var (
 	WindowSize = fyne.NewSize(800, 600)
 )
 
+type UI interface {
+	ShowError(error)
+	ShowURI(*bcclientgo.BCClient, fyne.URI)
+}
+
 func ShortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
+	}
+}
+
+type Link struct {
+	widget.Hyperlink
+	OnTapped func()
+}
+
+func (l *Link) Tapped(*fyne.PointEvent) {
+	if f := l.OnTapped; f != nil {
+		f()
 	}
 }

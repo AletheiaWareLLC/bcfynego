@@ -17,7 +17,10 @@
 package ui
 
 import (
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcgo"
+	"bytes"
 	"encoding/base64"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -25,11 +28,13 @@ import (
 	"sort"
 )
 
-type EntryView struct {
+type RecordView struct {
 	widget.Form
+	ui                   UI
+	client               *bcclientgo.BCClient
 	hash                 *widget.Label
-	timestamp            *widget.Label
-	creator              *widget.Label
+	timestamp            *TimestampLabel
+	creator              *Link
 	access               *fyne.Container
 	payload              *widget.Label
 	compressionAlgorithm *widget.Label
@@ -40,56 +45,55 @@ type EntryView struct {
 	meta                 *fyne.Container
 }
 
-func NewEntryView() *EntryView {
-	v := &EntryView{
+func NewRecordView(ui UI, client *bcclientgo.BCClient) *RecordView {
+	v := &RecordView{
+		ui:     ui,
+		client: client,
 		hash: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
-		timestamp: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		timestamp: NewTimestampLabel(0),
+		creator: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
-		},
-		creator: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
-			},
-			Wrapping: fyne.TextTruncate,
 		},
 		access: container.NewVBox(),
 		payload: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		compressionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		encryptionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		signature: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		signatureAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		reference: container.NewVBox(),
 		meta:      container.NewVBox(),
@@ -114,54 +118,70 @@ func NewEntryView() *EntryView {
 	v.Append("Signature", v.signatureAlgorithm)
 	v.Append("References", v.reference)
 	v.Append("Metadata", v.meta)
-	v.Hide()
 	return v
 }
 
-func (v *EntryView) SetHash(hash []byte) {
-	if hash == nil {
-		v.Hide()
-		return
+func (v *RecordView) SetURI(uri storage.RecordURI) error {
+	name := uri.Channel()
+	node, err := v.client.GetNode()
+	if err != nil {
+		return err
 	}
-	v.hash.SetText(base64.RawURLEncoding.EncodeToString(hash))
-	if v.Visible() {
-		v.Refresh()
+	blockHash := uri.BlockHash()
+	recordHash := uri.RecordHash()
+	var block *bcgo.Block
+	if blockHash == nil || len(blockHash) == 0 {
+		block, err = bcgo.GetBlockContainingRecord(name, node.Cache, node.Network, recordHash)
 	} else {
-		v.Show()
+		block, err = bcgo.GetBlock(name, node.Cache, node.Network, blockHash)
 	}
+	if err != nil {
+		return err
+	}
+	v.SetHash(recordHash)
+	for _, entry := range block.Entry {
+		if bytes.Equal(recordHash, entry.RecordHash) {
+			v.SetRecord(entry.Record)
+			break
+		}
+	}
+	return nil
 }
 
-func (v *EntryView) SetRecord(entry *bcgo.Record) {
-	if entry == nil {
-		v.Hide()
-		return
+func (v *RecordView) SetHash(hash []byte) {
+	v.hash.SetText(base64.RawURLEncoding.EncodeToString(hash))
+}
+
+func (v *RecordView) SetRecord(record *bcgo.Record) {
+	v.timestamp.SetTimestamp(record.Timestamp)
+	v.creator.SetText(record.Creator)
+	v.creator.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewAliasURI(record.Creator))
 	}
-	v.timestamp.SetText(bcgo.TimestampToString(entry.Timestamp))
-	v.creator.SetText(entry.Creator)
 	var accesses []fyne.CanvasObject
-	for _, a := range entry.Access {
-		v := NewAccessView()
+	for _, a := range record.Access {
+		v := NewAccessView(v.ui, v.client)
 		v.SetAccess(a)
 		accesses = append(accesses, v)
 	}
 	v.access.Objects = accesses
 	v.access.Refresh()
-	v.payload.SetText(base64.RawURLEncoding.EncodeToString(entry.Payload))
-	v.compressionAlgorithm.SetText(entry.CompressionAlgorithm.String())
-	v.encryptionAlgorithm.SetText(entry.EncryptionAlgorithm.String())
-	v.signature.SetText(base64.RawURLEncoding.EncodeToString(entry.Signature))
-	v.signatureAlgorithm.SetText(entry.SignatureAlgorithm.String())
+	v.payload.SetText(base64.RawURLEncoding.EncodeToString(record.Payload))
+	v.compressionAlgorithm.SetText(record.CompressionAlgorithm.String())
+	v.encryptionAlgorithm.SetText(record.EncryptionAlgorithm.String())
+	v.signature.SetText(base64.RawURLEncoding.EncodeToString(record.Signature))
+	v.signatureAlgorithm.SetText(record.SignatureAlgorithm.String())
 	var references []fyne.CanvasObject
-	for _, r := range entry.Reference {
-		v := NewReferenceView()
+	for _, r := range record.Reference {
+		v := NewReferenceView(v.ui, v.client)
 		v.SetReference(r)
 		references = append(references, v)
 	}
 	v.reference.Objects = references
 	v.reference.Refresh()
-	keys := make([]string, len(entry.Meta))
+	keys := make([]string, len(record.Meta))
 	i := 0
-	for k := range entry.Meta {
+	for k := range record.Meta {
 		keys[i] = k
 		i++
 	}
@@ -176,7 +196,7 @@ func (v *EntryView) SetRecord(entry *bcgo.Record) {
 				},
 			},
 			&widget.Label{
-				Text: entry.Meta[k],
+				Text: record.Meta[k],
 				TextStyle: fyne.TextStyle{
 					Monospace: true,
 				},
@@ -185,9 +205,5 @@ func (v *EntryView) SetRecord(entry *bcgo.Record) {
 	}
 	v.meta.Objects = metas
 	v.meta.Refresh()
-	if v.Visible() {
-		v.Refresh()
-	} else {
-		v.Show()
-	}
+	v.Refresh()
 }

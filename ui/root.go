@@ -30,7 +30,8 @@ func NewRootView(updater func() string) *RootView {
 	v := &RootView{
 		updater: updater,
 	}
-	v.Wrapping = fyne.TextTruncate
+	v.MultiLine = true
+	v.Wrapping = fyne.TextWrapBreak
 	v.ExtendBaseWidget(v)
 	v.update()
 	return v

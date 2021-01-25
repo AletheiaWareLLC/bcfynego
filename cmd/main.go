@@ -19,10 +19,10 @@ package main
 import (
 	"aletheiaware.com/bcclientgo"
 	"aletheiaware.com/bcfynego"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcfynego/ui"
 	"aletheiaware.com/bcfynego/ui/data"
 	"aletheiaware.com/bcgo"
-	"encoding/base64"
 	"flag"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -52,74 +52,45 @@ func main() {
 	// Create BC Client
 	c := bcclientgo.NewBCClient(bcgo.SplitRemoveEmpty(*peer, ",")...)
 
+	// Create BC Repository
+	r := storage.NewBCRepository(c)
+	r.Register()
+
 	// Create BC Fyne
 	f := bcfynego.NewBCFyne(a, w)
 
-	logo := f.GetLogo()
+	location := widget.NewEntry()
+	location.SetPlaceHolder("Channel")
 
-	block := ui.NewBlockView()
 	setAddressAction := func(address string) {
-		parts := strings.Split(address, "/")
-		channel := parts[0]
-		var blockhash []byte
-		if len(parts) > 1 {
-			bh, err := base64.RawURLEncoding.DecodeString(parts[1])
-			if err != nil {
-				f.ShowError(err)
-				return
-			}
-			blockhash = bh
+		if !strings.HasPrefix(address, storage.ALIAS_SCHEME_PREFIX) &&
+			!strings.HasPrefix(address, storage.BC_SCHEME_PREFIX) {
+			address = storage.BC_SCHEME_PREFIX + address
 		}
-		cache, err := c.GetCache()
+		uri, err := r.ParseURI(address)
 		if err != nil {
 			f.ShowError(err)
 			return
 		}
-		network, err := c.GetNetwork()
-		if err != nil {
-			f.ShowError(err)
-			return
-		}
-		if blockhash == nil {
-			ref, err := bcgo.GetHeadReference(channel, cache, network)
-			if err != nil {
-				f.ShowError(err)
-				return
-			}
-			blockhash = ref.BlockHash
-		}
-		block.SetHash(blockhash)
-		b, err := bcgo.GetBlock(channel, cache, network, blockhash)
-		if err != nil {
-			f.ShowError(err)
-			return
-		}
-		block.SetBlock(b)
+		location.SetText(uri.String())
+		f.ShowURI(c, uri)
 	}
 
-	address := widget.NewEntry()
-	address.SetPlaceHolder("Channel")
-	address.OnSubmitted = func(address string) {
+	location.OnSubmitted = func(address string) {
 		go setAddressAction(address)
 	}
 
-	w.SetContent(container.NewBorder(logo, nil, nil, nil, container.NewBorder(
-		container.NewBorder(nil, nil, nil, container.NewHBox(
-			widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
-				go setAddressAction(address.Text)
-			}),
-			widget.NewButtonWithIcon("", theme.NewThemedResource(data.AccountIcon), func() {
-				go f.ShowAccount(c)
-			}),
-			widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-				go settings(f, c)
-			}),
-		), address),
-		nil,
-		nil,
-		nil,
-		container.NewScroll(block),
-	)))
+	w.SetContent(container.NewBorder(container.NewBorder(nil, nil, nil, container.NewHBox(
+		widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
+			go setAddressAction(location.Text)
+		}),
+		widget.NewButtonWithIcon("", theme.NewThemedResource(data.AccountIcon), func() {
+			go f.ShowAccount(c)
+		}),
+		widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+			go settings(f, c)
+		}),
+	), location), nil, nil, nil, f.GetLogo()))
 	w.Resize(ui.WindowSize)
 	w.CenterOnScreen()
 	w.ShowAndRun()

@@ -17,6 +17,8 @@
 package ui
 
 import (
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcgo"
 	"encoding/base64"
 	"fyne.io/fyne/v2"
@@ -25,30 +27,36 @@ import (
 
 type AccessView struct {
 	widget.Form
-	alias               *widget.Label
+	ui                  UI
+	client              *bcclientgo.BCClient
+	alias               *Link
 	secretKey           *widget.Label
 	encryptionAlgorithm *widget.Label
 }
 
-func NewAccessView() *AccessView {
+func NewAccessView(ui UI, client *bcclientgo.BCClient) *AccessView {
 	v := &AccessView{
-		alias: &widget.Label{
-			TextStyle: fyne.TextStyle{
-				Monospace: true,
+		ui:     ui,
+		client: client,
+		alias: &Link{
+			Hyperlink: widget.Hyperlink{
+				TextStyle: fyne.TextStyle{
+					Monospace: true,
+				},
+				Wrapping: fyne.TextWrapBreak,
 			},
-			Wrapping: fyne.TextTruncate,
 		},
 		secretKey: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 		encryptionAlgorithm: &widget.Label{
 			TextStyle: fyne.TextStyle{
 				Monospace: true,
 			},
-			Wrapping: fyne.TextTruncate,
+			Wrapping: fyne.TextWrapBreak,
 		},
 	}
 	v.ExtendBaseWidget(v)
@@ -58,21 +66,15 @@ func NewAccessView() *AccessView {
 	v.Append("Alias", v.alias)
 	v.Append("Key", v.secretKey)
 	v.Append("Encryption", v.encryptionAlgorithm)
-	v.Hide()
 	return v
 }
 
 func (v *AccessView) SetAccess(access *bcgo.Record_Access) {
-	if access == nil {
-		v.Hide()
-		return
-	}
 	v.alias.SetText(access.Alias)
+	v.alias.OnTapped = func() {
+		v.ui.ShowURI(v.client, storage.NewAliasURI(access.Alias))
+	}
 	v.secretKey.SetText(base64.RawURLEncoding.EncodeToString(access.SecretKey))
 	v.encryptionAlgorithm.SetText(access.EncryptionAlgorithm.String())
-	if v.Visible() {
-		v.Refresh()
-	} else {
-		v.Show()
-	}
+	v.Refresh()
 }

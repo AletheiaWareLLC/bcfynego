@@ -22,34 +22,23 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type KeyView struct {
+type KeyLabel struct {
 	widget.Label
-	updater func() []byte
 }
 
-func NewKeyView(updater func() []byte) *KeyView {
-	v := &KeyView{
-		Label: widget.Label{
+func NewKeyLabel(key []byte) *KeyLabel {
+	k := &KeyLabel{
+		widget.Label{
 			Alignment: fyne.TextAlignLeading,
 			TextStyle: fyne.TextStyle{Monospace: true},
 			Wrapping:  fyne.TextWrapBreak,
 		},
-		updater: updater,
 	}
-	v.ExtendBaseWidget(v)
-	v.update()
-	return v
+	k.ExtendBaseWidget(k)
+	k.SetKey(key)
+	return k
 }
 
-func (v *KeyView) Refresh() {
-	v.update()
-	v.Label.Refresh()
-}
-
-func (v *KeyView) update() {
-	if u := v.updater; u != nil {
-		if bytes := u(); len(bytes) != 0 {
-			v.Text = base64.RawURLEncoding.EncodeToString(bytes)
-		}
-	}
+func (k *KeyLabel) SetKey(key []byte) {
+	k.SetText(base64.RawURLEncoding.EncodeToString(key))
 }

@@ -16,31 +16,84 @@
 
 package ui
 
-import "fyne.io/fyne/v2/widget"
+import (
+	"aletheiaware.com/aliasgo"
+	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
+	"aletheiaware.com/bcgo"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+)
 
-type AliasView struct {
+type AliasLabel struct {
 	widget.Label
-	updater func() string
 }
 
-func NewAliasView(updater func() string) *AliasView {
+func NewAliasLabel(alias string) *AliasLabel {
+	a := &AliasLabel{
+		Label: widget.Label{
+			Alignment: fyne.TextAlignLeading,
+			TextStyle: fyne.TextStyle{Monospace: true},
+			Wrapping:  fyne.TextWrapBreak,
+		},
+	}
+	a.ExtendBaseWidget(a)
+	a.SetAlias(alias)
+	return a
+}
+
+func (a *AliasLabel) SetAlias(alias string) {
+	a.SetText(alias)
+}
+
+type AliasView struct {
+	widget.Form
+	ui        UI
+	client    *bcclientgo.BCClient
+	timestamp *TimestampLabel
+	alias     *AliasLabel
+	key       *KeyLabel
+}
+
+func NewAliasView(ui UI, client *bcclientgo.BCClient) *AliasView {
 	v := &AliasView{
-		updater: updater,
+		ui:        ui,
+		client:    client,
+		timestamp: NewTimestampLabel(0),
+		alias:     NewAliasLabel(""),
+		key:       NewKeyLabel(nil),
 	}
 	v.ExtendBaseWidget(v)
-	v.update()
+	v.alias.ExtendBaseWidget(v.alias)
+	v.key.ExtendBaseWidget(v.key)
+	v.timestamp.ExtendBaseWidget(v.timestamp)
+	v.Append("Timestamp", v.timestamp)
+	v.Append("Alias", v.alias)
+	v.Append("Key", v.key)
 	return v
 }
 
-func (v *AliasView) Refresh() {
-	v.update()
-	v.Label.Refresh()
-}
-
-func (v *AliasView) update() {
-	if u := v.updater; u != nil {
-		if a := u(); a != "" {
-			v.Text = a
-		}
+func (v *AliasView) SetURI(uri storage.AliasURI) error {
+	cache, err := v.client.GetCache()
+	if err != nil {
+		return err
 	}
+	network, err := v.client.GetNetwork()
+	if err != nil {
+		return err
+	}
+	aliases := aliasgo.OpenAliasChannel()
+	if err := aliases.Refresh(cache, network); err != nil {
+		// Ignored
+	}
+	alias := uri.Alias()
+	r, a, err := aliasgo.GetRecord(aliases, cache, network, alias)
+	if err != nil {
+		return err
+	}
+	v.alias.SetText(alias)
+	v.key.SetKey(a.PublicKey)
+	v.timestamp.SetText(bcgo.TimestampToString(r.Timestamp))
+	v.Refresh()
+	return nil
 }

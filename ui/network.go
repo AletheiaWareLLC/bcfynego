@@ -32,7 +32,7 @@ func NewNetworkView(updater func() bcgo.Network) *NetworkView {
 	v := &NetworkView{
 		updater: updater,
 	}
-	v.Wrapping = fyne.TextTruncate
+	v.Wrapping = fyne.TextWrapBreak
 	v.ExtendBaseWidget(v)
 	v.update()
 	return v
@@ -50,3 +50,6 @@ func (v *NetworkView) update() {
 		}
 	}
 }
+
+// TODO show information in more structured UI
+// - Peer Domain, Latency, Errors

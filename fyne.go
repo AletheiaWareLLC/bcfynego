@@ -19,6 +19,7 @@ package bcfynego
 import (
 	"aletheiaware.com/aliasgo"
 	"aletheiaware.com/bcclientgo"
+	"aletheiaware.com/bcfynego/storage"
 	"aletheiaware.com/bcfynego/ui"
 	"aletheiaware.com/bcfynego/ui/account"
 	"aletheiaware.com/bcfynego/ui/data"
@@ -389,14 +390,13 @@ func (f *BCFyne) ShowAccount(client *bcclientgo.BCClient) {
 	box.Add(widget.NewButton("Export Keys", func() {
 		f.ExportKeys(client, node)
 	}))
-	box.Add(widget.NewButton("Switch Keys", func() {
-		f.Dialog.Hide()
-		f.SwitchKeys(client)
-		go f.ShowAccessDialog(client, nil)
-	}))
 	box.Add(widget.NewButton("Delete Keys", func() {
 		f.Dialog.Hide()
 		f.DeleteKeys(client, node)
+	}))
+	box.Add(widget.NewButton("Sign Out", func() {
+		f.Dialog.Hide()
+		f.SignOut(client)
 	}))
 	f.Dialog.Show()
 	f.Dialog.Resize(ui.DialogSize)
@@ -465,7 +465,7 @@ func (f *BCFyne) ExportKeys(client *bcclientgo.BCClient, node *bcgo.Node) {
 	f.Dialog.Resize(ui.DialogSize)
 }
 
-func (f *BCFyne) SwitchKeys(client *bcclientgo.BCClient) {
+func (f *BCFyne) SignOut(client *bcclientgo.BCClient) {
 	client.Root = ""
 	client.Cache = nil
 	client.Network = nil
@@ -483,6 +483,37 @@ func (f *BCFyne) ShowError(err error) {
 	}
 	f.Dialog = dialog.NewError(err, f.Window)
 	f.Dialog.Show()
+}
+
+func (f *BCFyne) ShowURI(client *bcclientgo.BCClient, uri fyne.URI) {
+	var view fyne.CanvasObject
+	switch u := uri.(type) {
+	case storage.AliasURI:
+		av := ui.NewAliasView(f, client)
+		av.SetURI(u)
+		view = av
+	case storage.RecordURI:
+		rv := ui.NewRecordView(f, client)
+		rv.SetURI(u)
+		view = rv
+	case storage.BlockURI:
+		bv := ui.NewBlockView(f, client)
+		bv.SetURI(u)
+		view = bv
+	case storage.ChannelURI:
+		hv := ui.NewHeadView(f, client)
+		hv.SetURI(u)
+		view = hv
+	default:
+		f.ShowError(fmt.Errorf("Unrecognized URI: %s", uri))
+		return
+	}
+
+	window := f.App.NewWindow(uri.Name())
+	window.SetContent(container.NewVScroll(view))
+	window.Resize(ui.WindowSize)
+	window.CenterOnScreen()
+	window.Show()
 }
 
 func (f *BCFyne) ShowNode(node *bcgo.Node) {
@@ -504,8 +535,8 @@ func nodeView(node *bcgo.Node) (fyne.CanvasObject, error) {
 		return nil, err
 	}
 
-	aliasScroller := container.NewHScroll(ui.NewAliasView(func() string { return node.Alias }))
-	publicKeyScroller := container.NewVScroll(ui.NewKeyView(func() []byte { return publicKeyBytes }))
+	aliasScroller := container.NewHScroll(ui.NewAliasLabel(node.Alias))
+	publicKeyScroller := container.NewVScroll(ui.NewKeyLabel(publicKeyBytes))
 	publicKeyScroller.SetMinSize(fyne.NewSize(0, 10*theme.TextSize())) // Show at least 10 lines
 
 	return widget.NewForm(
