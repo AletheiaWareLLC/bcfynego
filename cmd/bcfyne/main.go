@@ -63,6 +63,9 @@ func main() {
 	location.SetPlaceHolder("Channel")
 
 	setAddressAction := func(address string) {
+		if address == "" {
+			return
+		}
 		if !strings.HasPrefix(address, storage.ALIAS_SCHEME_PREFIX) &&
 			!strings.HasPrefix(address, storage.BC_SCHEME_PREFIX) {
 			address = storage.BC_SCHEME_PREFIX + address

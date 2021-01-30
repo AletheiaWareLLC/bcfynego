@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2020 Aletheia Ware LLC
+# Copyright 2020-2021 Aletheia Ware LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,8 @@ set -x
 go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
 go vet $GOPATH/src/aletheiaware.com/bcfynego/...
 go test $GOPATH/src/aletheiaware.com/bcfynego/...
-mkdir -p fyne-cross/logs
-(fyne-cross android -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC_unaligned ./cmd/ >./fyne-cross/logs/android 2>&1 && cd $GOPATH/src/aletheiaware.com/bcfynego/fyne-cross/dist/android && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk) &
-fyne-cross darwin -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC ./cmd/ >./fyne-cross/logs/darwin 2>&1 &
-fyne-cross linux -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output bc ./cmd/ >./fyne-cross/logs/linux 2>&1 &
-#fyne-cross windows -app-id com.aletheiaware.bc -debug -icon ./ui/data/logo.png -output BC ./cmd/ >./fyne-cross/logs/windows 2>&1 &
-for job in `jobs -p`
-do
-    wait $job
-done
+fyne-cross android -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -keystore=./private/BC.keystore -output BC -release ./cmd/bcfyne/
+fyne-cross darwin -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
+fyne-cross ios -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
+fyne-cross linux -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/
+fyne-cross windows -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/

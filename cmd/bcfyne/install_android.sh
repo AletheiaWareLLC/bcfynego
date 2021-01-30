@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2020 Aletheia Ware LLC
+# Copyright 2020-2021 Aletheia Ware LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,4 +21,9 @@ set -x
 go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
 go vet $GOPATH/src/aletheiaware.com/bcfynego/...
 go test $GOPATH/src/aletheiaware.com/bcfynego/...
-go build -o $GOPATH/bin/bcfynego aletheiaware.com/bcfynego/cmd
+ANDROID_NDK_HOME=${ANDROID_HOME}/ndk-bundle/
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && fyne package -os android -appID com.aletheiaware.bc -icon $GOPATH/src/aletheiaware.com/bcfynego/ui/data/logo.png -name BC_unaligned)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && adb install -r -g BC.apk)
+#(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && adb logcat com.aletheiaware.bc:V org.golang.app:V *:S | tee android.log)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && adb logcat -c && adb logcat | tee android.log)
