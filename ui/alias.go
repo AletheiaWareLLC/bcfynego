@@ -20,7 +20,6 @@ import (
 	"aletheiaware.com/aliasgo"
 	"aletheiaware.com/bcclientgo"
 	"aletheiaware.com/bcfynego/storage"
-	"aletheiaware.com/bcgo"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
@@ -93,7 +92,7 @@ func (v *AliasView) SetURI(uri storage.AliasURI) error {
 	}
 	v.alias.SetText(alias)
 	v.key.SetKey(a.PublicKey)
-	v.timestamp.SetText(bcgo.TimestampToString(r.Timestamp))
+	v.timestamp.SetTimestamp(r.Timestamp)
 	v.Refresh()
 	return nil
 }
