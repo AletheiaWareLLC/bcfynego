@@ -21,8 +21,8 @@ set -x
 go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
 go vet $GOPATH/src/aletheiaware.com/bcfynego/...
 go test $GOPATH/src/aletheiaware.com/bcfynego/...
-fyne-cross android -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -keystore=./private/BC.keystore -output BC -release ./cmd/bcfyne/
-fyne-cross darwin -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
-fyne-cross ios -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
-fyne-cross linux -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/
-fyne-cross windows -app-id com.aletheiaware.bc -app-version 1.1.5 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/
+fyne-cross android -app-id com.aletheiaware.bc -app-version 1.1.7 -icon ./ui/data/logo.png -keystore=./private/BC.keystore -output BC -release ./cmd/bcfyne/
+fyne-cross darwin -app-id com.aletheiaware.bc -app-version 1.1.7 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
+fyne-cross ios -app-id com.aletheiaware.bc -app-version 1.1.7 -icon ./ui/data/logo.png -output BC -release ./cmd/bcfyne/
+fyne-cross linux -app-id com.aletheiaware.bc -app-version 1.1.7 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/
+fyne-cross windows -app-id com.aletheiaware.bc -app-version 1.1.7 -icon ./ui/data/logo.png -output bc -release ./cmd/bcfyne/
