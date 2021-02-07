@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2020-2021 Aletheia Ware LLC
+# Copyright 2021 Aletheia Ware LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,6 @@ set -x
 go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
 go vet $GOPATH/src/aletheiaware.com/bcfynego/...
 go test $GOPATH/src/aletheiaware.com/bcfynego/...
-mkdir -p fyne-cross/logs
-(fyne-cross android -app-id com.aletheiaware.bc -debug -output BC_unaligned ./cmd/bcfyne >./fyne-cross/logs/android 2>&1 && cd $GOPATH/src/aletheiaware.com/bcfynego/fyne-cross/dist/android && ${ANDROID_HOME}/build-tools/28.0.3/zipalign -f 4 BC_unaligned.apk BC.apk) &
-fyne-cross darwin -app-id com.aletheiaware.bc -debug -output BC ./cmd/bcfyne >./fyne-cross/logs/darwin 2>&1 &
-fyne-cross linux -app-id com.aletheiaware.bc -debug -output bc ./cmd/bcfyne >./fyne-cross/logs/linux 2>&1 &
-#fyne-cross windows -app-id com.aletheiaware.bc -debug -output BC ./cmd/bcfyne >./fyne-cross/logs/windows 2>&1 &
-for job in `jobs -p`
-do
-    wait $job
-done
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && fyne release -os android -appID com.aletheiaware.bc -appBuild 1 -appVersion 1.1.8 -keyStore=$GOPATH/src/aletheiaware.com/bcfynego/private/BC.keystore -name BC)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && adb install -r -g BC.apk)
+(cd $GOPATH/src/aletheiaware.com/bcfynego/cmd/bcfyne && adb logcat -c && adb logcat | tee android.log)
