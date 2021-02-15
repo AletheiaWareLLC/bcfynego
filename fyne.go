@@ -180,23 +180,24 @@ func (f *BCFyne) NewNode(client *bcclientgo.BCClient, alias string, password []b
 }
 
 func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bcgo.Node)) {
-	signIn := account.NewSignIn()
-	importKey := account.NewImportKey()
-	signUp := account.NewSignUp()
 	if d := f.Dialog; d != nil {
 		d.Hide()
 	}
+	signIn := account.NewSignIn()
+	importKey := account.NewImportKey()
+	signUp := account.NewSignUp()
+	accordion := widget.NewAccordion(
+		&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
+		widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
+		widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
+	)
 	tos := &widget.Hyperlink{Text: "Terms of Service"}
 	tos.SetURLFromString("https://aletheiaware.com/terms-of-service.html")
 	pp := &widget.Hyperlink{Text: "Privacy Policy", Alignment: fyne.TextAlignTrailing}
 	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
 	f.Dialog = dialog.NewCustom("Account Access", "Cancel",
 		container.NewVBox(
-			widget.NewAccordion(
-				&widget.AccordionItem{Title: "Sign In", Detail: signIn.CanvasObject(), Open: true},
-				widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
-				widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
-			),
+			accordion,
 			container.NewMax(
 				&canvas.Image{
 					Resource: data.AW,
@@ -369,6 +370,11 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 
 	if pwd, ok := os.LookupEnv("PASSWORD"); ok {
 		signIn.Password.SetText(pwd)
+	}
+
+	if signIn.Alias.Text == "" {
+		// Make accordion show sign up as open instead of sign in
+		accordion.Open(2)
 	}
 
 	f.Dialog.Show()
