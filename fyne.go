@@ -197,7 +197,13 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 				widget.NewAccordionItem("Import Keys", importKey.CanvasObject()),
 				widget.NewAccordionItem("Sign Up", signUp.CanvasObject()),
 			),
-			container.NewGridWithColumns(2, tos, pp),
+			container.NewMax(
+				&canvas.Image{
+					Resource: data.AW,
+					FillMode: canvas.ImageFillContain,
+				},
+				container.NewGridWithColumns(2, tos, pp),
+			),
 		),
 		f.Window)
 

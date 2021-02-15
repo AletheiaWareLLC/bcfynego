@@ -5,6 +5,10 @@ package data
 
 import "fyne.io/fyne/v2"
 
+var AW = &fyne.StaticResource{
+	StaticName:    "aw.svg",
+	StaticContent: []byte("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" width=\"48\" height=\"48\">\n    <g fill=\"none\" stroke=\"black\" stroke-linecap=\"butt\" stroke-linejoin=\"bevel\" stroke-width=\"1\">\n        <circle cx=\"24\" cy=\"24\" r=\"20\" />\n        <polyline points=\"4,24 12,16 20,24 28,32 32,28 36,32 44,24\" />\n    </g>\n</svg>\n"),
+}
 var Logo = &fyne.StaticResource{
 	StaticName:    "bc.svg",
 	StaticContent: []byte("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\" width=\"26\" height=\"48\" viewBox=\"0 0 26 48\">\n    <g fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1\">\n        <g stroke=\"blue\">\n            <path d=\"M12,28 L6,28 L6,4 L12,4 C20,4 20,16 12,16\" />\n        </g>\n        <g stroke=\"red\">\n            <path d=\"M20,20 C4,20 4,44 20,44\" />\n        </g>\n        <g stroke=\"blue\">\n            <path d=\"M12,16 C20,16 20,28 12,28\" />\n        </g>\n    </g>\n</svg>\n"),
