@@ -21,8 +21,8 @@ set -x
 go fmt $GOPATH/src/aletheiaware.com/bcfynego/...
 go vet $GOPATH/src/aletheiaware.com/bcfynego/...
 go test $GOPATH/src/aletheiaware.com/bcfynego/...
-fyne-cross android -app-id com.aletheiaware.bc -app-version 1.1.9 -keystore=./private/BC.keystore -output BC -release ./cmd/bcfyne/
-fyne-cross darwin -app-id com.aletheiaware.bc -app-version 1.1.9 -output BC -release ./cmd/bcfyne/
-fyne-cross ios -app-id com.aletheiaware.bc -app-version 1.1.9 -output BC -release ./cmd/bcfyne/
-fyne-cross linux -app-id com.aletheiaware.bc -app-version 1.1.9 -output bc -release ./cmd/bcfyne/
-fyne-cross windows -app-id com.aletheiaware.bc -app-version 1.1.9 -output bc -release ./cmd/bcfyne/
+fyne-cross android -app-id com.aletheiaware.bc -app-version 1.1.10 -keystore=./private/BC.keystore -output BC -release ./cmd/bcfyne/
+fyne-cross darwin -app-id com.aletheiaware.bc -app-version 1.1.10 -output BC -release ./cmd/bcfyne/
+fyne-cross ios -app-id com.aletheiaware.bc -app-version 1.1.10 -output BC -release ./cmd/bcfyne/
+fyne-cross linux -app-id com.aletheiaware.bc -app-version 1.1.10 -output bc -release ./cmd/bcfyne/
+fyne-cross windows -app-id com.aletheiaware.bc -app-version 1.1.10 -output bc -release ./cmd/bcfyne/
