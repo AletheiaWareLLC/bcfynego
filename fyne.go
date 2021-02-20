@@ -311,6 +311,8 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 			return
 		}
 
+		// TODO check Alias is Unique
+
 		if len(password) < cryptogo.MIN_PASSWORD {
 			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
 			return
@@ -336,6 +338,16 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	}
 	signUp.Confirm.OnSubmitted = func(string) {
 		signUpAction()
+	}
+
+	signUp.Alias.Validator = func(alias string) error {
+		if err := aliasgo.ValidateAlias(alias); err != nil {
+			return err
+		}
+
+		// TODO check Alias is Unique
+
+		return nil
 	}
 
 	signUp.SignUpButton.OnTapped = signUpAction
