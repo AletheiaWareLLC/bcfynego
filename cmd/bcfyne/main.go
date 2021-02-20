@@ -199,5 +199,7 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 			return n
 		}),
 	))
-	dialog.ShowCustom("Settings", "OK", form, f.Window)
+	d := dialog.NewCustom("Settings", "OK", form, f.Window)
+	d.Show()
+	d.Resize(ui.DialogSize)
 }
