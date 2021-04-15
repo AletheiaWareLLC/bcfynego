@@ -1,9 +1,7 @@
-aletheiaware.com/aliasgo v1.1.7 h1:mm8g4kuI0QTDvQJyhr/jUb3FV9BDBSsAB2m2PT4Nkt8=
-aletheiaware.com/aliasgo v1.1.7/go.mod h1:D45FthloN9oaP/sZypm+rPhiBtixa4JNaZ5DCWePns8=
-aletheiaware.com/bcclientgo v1.1.8 h1:MgO0uU8Z8nTR1GWnA/YEuWVsL6b+ituh9sOhBWzSRZY=
-aletheiaware.com/bcclientgo v1.1.8/go.mod h1:f7ONjTfBJQcSrwidVQjmk9PDKz67DFFHBpadB1/Szm0=
-aletheiaware.com/bcgo v1.1.9 h1:wJMnso1RoUw2F2CZRn6fjfLSkuxHUAshyxqC4M3b+0o=
-aletheiaware.com/bcgo v1.1.9/go.mod h1:BMkERSHweI9EFRHLn3snO7gj/qLS/mFHDd91E58Tpj0=
+aletheiaware.com/aliasgo v1.1.8 h1:b8HIdMcp8oLIiHt9J5Td8s4i34POSSKOTU+jqewgVMg=
+aletheiaware.com/aliasgo v1.1.8/go.mod h1:U33raUOnACopYtnx27oHfia9VQyeSgOb1MJ+ljnLoQU=
+aletheiaware.com/bcclientgo v1.1.9 h1:Fsbd+3PzQ0UScWsZZr0P39aw3rkUV+i7vZ+egzvugJA=
+aletheiaware.com/bcclientgo v1.1.9/go.mod h1:PxXtGj3eZsIeCMSruCswiXEfufCFvdJipTswuo8vvt0=
 aletheiaware.com/bcgo v1.1.10 h1:RWn8abfWmqLP4TeshOP3Okh0TsFZVxeq1bPawvADFQs=
 aletheiaware.com/bcgo v1.1.10/go.mod h1:BMkERSHweI9EFRHLn3snO7gj/qLS/mFHDd91E58Tpj0=
 aletheiaware.com/cryptogo v1.1.2 h1:1Ga50f8iwtoAaAGAhey46lvN21SWcxyGIJrO+OSw31o=
