@@ -195,18 +195,28 @@ func (f *BCFyne) ShowAccessDialog(client *bcclientgo.BCClient, callback func(*bc
 	tos.SetURLFromString("https://aletheiaware.com/terms-of-service.html")
 	pp := &widget.Hyperlink{Text: "Privacy Policy", Alignment: fyne.TextAlignTrailing}
 	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
-	d := dialog.NewCustom("Account Access", "Cancel",
-		container.NewVBox(
-			accordion,
-			container.NewMax(
-				&canvas.Image{
-					Resource: data.AW,
-					FillMode: canvas.ImageFillContain,
-				},
-				container.NewGridWithColumns(2, tos, pp),
-			),
-		),
-		f.Window)
+	contents := container.NewVBox()
+	if !bcgo.IsLive() {
+		contents.Add(container.NewPadded(&canvas.Text{
+			Alignment: fyne.TextAlignCenter,
+			Color:     theme.PrimaryColorNamed(theme.ColorRed),
+			Text:      "TEST MODE",
+			TextSize:  theme.TextSize(),
+			TextStyle: fyne.TextStyle{
+				Bold:      true,
+				Monospace: true,
+			},
+		}))
+	}
+	contents.Add(accordion)
+	contents.Add(container.NewMax(
+		&canvas.Image{
+			Resource: data.AW,
+			FillMode: canvas.ImageFillContain,
+		},
+		container.NewGridWithColumns(2, tos, pp),
+	))
+	d := dialog.NewCustom("Account Access", "Cancel", contents, f.Window)
 
 	signInAction := func() {
 		d.Hide()
