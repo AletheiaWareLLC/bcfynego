@@ -93,17 +93,17 @@ func main() {
 		widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 			go settings(f, c)
 		}),
-	), location), nil, nil, nil, f.GetLogo()))
+	), location), nil, nil, nil, f.Logo()))
 	w.Resize(ui.WindowSize)
 	w.CenterOnScreen()
 	w.ShowAndRun()
 }
 
-func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
+func settings(f bcfynego.BCFyne, c bcclientgo.BCClient) {
 	form := widget.NewForm()
 
 	root := ui.NewRootView(func() string {
-		r, err := c.GetRoot()
+		r, err := c.Root()
 		if err != nil {
 			f.ShowError(err)
 			return ""
@@ -119,21 +119,22 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 
 	peerList := &widget.List{
 		Length: func() int {
-			return len(c.Peers)
+			return len(c.Peers())
 		},
 		CreateItem: func() fyne.CanvasObject {
 			return container.NewBorder(nil, nil, nil, widget.NewButtonWithIcon("", theme.ContentRemoveIcon(), nil), widget.NewLabel(""))
 		},
 	}
 	peerList.UpdateItem = func(index widget.ListItemID, item fyne.CanvasObject) {
-		if index < 0 || index >= len(c.Peers) {
+		peers := c.Peers()
+		if index < 0 || index >= len(peers) {
 			return
 		}
-		p := c.Peers[index]
+		p := peers[index]
 		os := item.(*fyne.Container).Objects
 		os[0].(*widget.Label).SetText(p)
 		os[1].(*widget.Button).OnTapped = func() {
-			c.SetPeers(append(c.Peers[:index], c.Peers[index+1:]...)...)
+			c.SetPeers(append(peers[:index], peers[index+1:]...)...)
 			form.Refresh()
 		}
 	}
@@ -147,26 +148,26 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 					widget.NewFormItem("Peer", entry),
 				}, func(ok bool) {
 					if ok {
-						c.SetPeers(append(c.Peers, entry.Text)...)
+						c.SetPeers(append(c.Peers(), entry.Text)...)
 						form.Refresh()
 					}
-				}, f.Window)
+				}, f.Window())
 			}),
 			widget.NewButton("Reset", func() {
 				dialog.ShowConfirm("Reset Peers", "Reset peers to default?", func(reset bool) {
 					if !reset {
 						return
 					}
-					c.SetPeers(bcgo.GetBCHost())
+					c.SetPeers(bcgo.BCHost())
 					form.Refresh()
-				}, f.Window)
+				}, f.Window())
 			}),
 		),
 	))
 
 	form.Append("Cache", container.NewVBox(
 		ui.NewCacheView(func() bcgo.Cache {
-			h, err := c.GetCache()
+			h, err := c.Cache()
 			if err != nil {
 				f.ShowError(err)
 				return nil
@@ -185,13 +186,13 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 					}
 				}()
 				form.Refresh()
-			}, f.Window)
+			}, f.Window())
 		}),
 	))
 
 	form.Append("Network", container.NewVBox(
 		ui.NewNetworkView(func() bcgo.Network {
-			n, err := c.GetNetwork()
+			n, err := c.Network()
 			if err != nil {
 				f.ShowError(err)
 				return nil
@@ -199,7 +200,7 @@ func settings(f *bcfynego.BCFyne, c *bcclientgo.BCClient) {
 			return n
 		}),
 	))
-	d := dialog.NewCustom("Settings", "OK", form, f.Window)
+	d := dialog.NewCustom("Settings", "OK", form, f.Window())
 	d.Show()
 	d.Resize(ui.DialogSize)
 }
