@@ -28,7 +28,6 @@ import (
 	"aletheiaware.com/bcgo/node"
 	"aletheiaware.com/cryptogo"
 	"bytes"
-	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -261,7 +260,7 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 		alias := signIn.Alias.Text
 		password := []byte(signIn.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
+			f.ShowError(cryptogo.ErrPasswordTooShort{Size: len(password), Min: cryptogo.MIN_PASSWORD})
 			return
 		}
 		f.ExistingNode(client, alias, password, func(node bcgo.Node) {
@@ -317,7 +316,7 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 
 			password := []byte(authentication.Password.Text)
 			if len(password) < cryptogo.MIN_PASSWORD {
-				f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
+				f.ShowError(cryptogo.ErrPasswordTooShort{Size: len(password), Min: cryptogo.MIN_PASSWORD})
 				return
 			}
 			f.ExistingNode(client, alias, password, func(node bcgo.Node) {
@@ -361,11 +360,11 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 		// TODO check Alias is Unique
 
 		if len(password) < cryptogo.MIN_PASSWORD {
-			f.ShowError(fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD))
+			f.ShowError(cryptogo.ErrPasswordTooShort{Size: len(password), Min: cryptogo.MIN_PASSWORD})
 			return
 		}
 		if !bytes.Equal(password, confirm) {
-			f.ShowError(errors.New(cryptogo.ERROR_PASSWORDS_DO_NOT_MATCH))
+			f.ShowError(cryptogo.ErrPasswordsDoNotMatch{})
 			return
 		}
 		f.NewNode(client, alias, password, func(node bcgo.Node) {
@@ -492,7 +491,7 @@ func (f *bcFyne) ExportKeys(client bcclientgo.BCClient, node bcgo.Node) {
 
 		password := []byte(authentication.Password.Text)
 		if len(password) < cryptogo.MIN_PASSWORD {
-			err = fmt.Errorf(cryptogo.ERROR_PASSWORD_TOO_SHORT, len(password), cryptogo.MIN_PASSWORD)
+			err = cryptogo.ErrPasswordTooShort{Size: len(password), Min: cryptogo.MIN_PASSWORD}
 		} else {
 			access, err = client.ExportKeys(host, alias, password)
 		}
