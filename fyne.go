@@ -233,16 +233,7 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
 	contents := container.NewVBox()
 	if !bcgo.IsLive() {
-		contents.Add(container.NewPadded(&canvas.Text{
-			Alignment: fyne.TextAlignCenter,
-			Color:     theme.PrimaryColorNamed(theme.ColorRed),
-			Text:      "TEST MODE",
-			TextSize:  theme.TextSize(),
-			TextStyle: fyne.TextStyle{
-				Bold:      true,
-				Monospace: true,
-			},
-		}))
+		contents.Add(testModeSign())
 	}
 	contents.Add(accordion)
 	contents.Add(container.NewMax(
@@ -306,10 +297,13 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 
 		authentication := accountui.NewAuthentication(alias)
 
-		d := dialog.NewCustom("Keys Imported", "Cancel",
-			container.NewVBox(
-				widget.NewLabel(fmt.Sprintf("Keys for %s successfully imported from %s.\nAuthenticate to continue", alias, host)),
-				authentication.CanvasObject()), f.window)
+		contents := container.NewVBox()
+		if !bcgo.IsLive() {
+			contents.Add(testModeSign())
+		}
+		contents.Add(widget.NewLabel(fmt.Sprintf("Keys for %s successfully imported from %s.\nAuthenticate to continue", alias, host)))
+		contents.Add(authentication.CanvasObject())
+		d := dialog.NewCustom("Keys Imported", "Cancel", contents, f.window)
 
 		authenticateAction := func() {
 			d.Hide()
@@ -449,19 +443,21 @@ func (f *bcFyne) ShowAccount(client bcclientgo.BCClient) {
 		f.ShowError(err)
 		return
 	}
-	box := container.NewVBox(
-		form,
-	)
+	contents := container.NewVBox()
+	if !bcgo.IsLive() {
+		contents.Add(testModeSign())
+	}
+	contents.Add(form)
 
-	d := dialog.NewCustom("Account", "OK", box, f.window)
-	box.Add(widget.NewButton("Export Keys", func() {
+	d := dialog.NewCustom("Account", "OK", contents, f.window)
+	contents.Add(widget.NewButton("Export Keys", func() {
 		f.ExportKeys(client, node)
 	}))
-	box.Add(widget.NewButton("Delete Keys", func() {
+	contents.Add(widget.NewButton("Delete Keys", func() {
 		d.Hide()
 		f.DeleteKeys(client, node)
 	}))
-	box.Add(widget.NewButton("Sign Out", func() {
+	contents.Add(widget.NewButton("Sign Out", func() {
 		d.Hide()
 		f.SignOut(client)
 	}))
@@ -514,7 +510,12 @@ func (f *bcFyne) ExportKeys(client bcclientgo.BCClient, node bcgo.Node) {
 				}),
 			)),
 		)
-		d := dialog.NewCustom("Keys Exported", "OK", form, f.window)
+		contents := container.NewVBox()
+		if !bcgo.IsLive() {
+			contents.Add(testModeSign())
+		}
+		contents.Add(form)
+		d := dialog.NewCustom("Keys Exported", "OK", contents, f.window)
 		d.Show()
 		d.Resize(ui.DialogSize)
 
@@ -526,7 +527,13 @@ func (f *bcFyne) ExportKeys(client bcclientgo.BCClient, node bcgo.Node) {
 		authenticateAction()
 	}
 	authentication.AuthenticateButton.OnTapped = authenticateAction
-	d := dialog.NewCustom("Account", "Cancel", authentication.CanvasObject(), f.window)
+
+	contents := container.NewVBox()
+	if !bcgo.IsLive() {
+		contents.Add(testModeSign())
+	}
+	contents.Add(authentication.CanvasObject())
+	d := dialog.NewCustom("Account", "Cancel", contents, f.window)
 	d.Show()
 	d.Resize(ui.DialogSize)
 }
@@ -584,7 +591,12 @@ func (f *bcFyne) ShowNode(node bcgo.Node) {
 		f.ShowError(err)
 		return
 	}
-	dialog.ShowCustom("Node", "OK", form, f.window)
+	contents := container.NewVBox()
+	if !bcgo.IsLive() {
+		contents.Add(testModeSign())
+	}
+	contents.Add(form)
+	dialog.ShowCustom("Node", "OK", contents, f.window)
 }
 
 func nodeView(node bcgo.Node) (fyne.CanvasObject, error) {
@@ -612,4 +624,17 @@ func nodeView(node bcgo.Node) (fyne.CanvasObject, error) {
 			formatScroller,
 		),
 	), nil
+}
+
+func testModeSign() fyne.CanvasObject {
+	return container.NewPadded(&canvas.Text{
+		Alignment: fyne.TextAlignCenter,
+		Color:     theme.PrimaryColorNamed(theme.ColorRed),
+		Text:      "TEST MODE",
+		TextSize:  theme.TextSize(),
+		TextStyle: fyne.TextStyle{
+			Bold:      true,
+			Monospace: true,
+		},
+	})
 }
