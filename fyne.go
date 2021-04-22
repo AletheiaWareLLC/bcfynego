@@ -245,7 +245,7 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 	pp.SetURLFromString("https://aletheiaware.com/privacy-policy.html")
 	contents := container.NewVBox()
 	if !bcgo.IsLive() {
-		contents.Add(testModeSign())
+		contents.Add(ui.NewTestModeSign())
 	}
 	contents.Add(accordion)
 	contents.Add(container.NewMax(
@@ -311,7 +311,7 @@ func (f *bcFyne) ShowAccessDialog(client bcclientgo.BCClient, callback func(bcgo
 
 		contents := container.NewVBox()
 		if !bcgo.IsLive() {
-			contents.Add(testModeSign())
+			contents.Add(ui.NewTestModeSign())
 		}
 		contents.Add(widget.NewLabel(fmt.Sprintf("Keys for %s successfully imported from %s.\nAuthenticate to continue", alias, host)))
 		contents.Add(authentication.CanvasObject())
@@ -457,7 +457,7 @@ func (f *bcFyne) ShowAccount(client bcclientgo.BCClient) {
 	}
 	contents := container.NewVBox()
 	if !bcgo.IsLive() {
-		contents.Add(testModeSign())
+		contents.Add(ui.NewTestModeSign())
 	}
 	contents.Add(form)
 
@@ -524,7 +524,7 @@ func (f *bcFyne) ExportKeys(client bcclientgo.BCClient, account bcgo.Account) {
 		)
 		contents := container.NewVBox()
 		if !bcgo.IsLive() {
-			contents.Add(testModeSign())
+			contents.Add(ui.NewTestModeSign())
 		}
 		contents.Add(form)
 		d := dialog.NewCustom("Keys Exported", "OK", contents, f.window)
@@ -542,7 +542,7 @@ func (f *bcFyne) ExportKeys(client bcclientgo.BCClient, account bcgo.Account) {
 
 	contents := container.NewVBox()
 	if !bcgo.IsLive() {
-		contents.Add(testModeSign())
+		contents.Add(ui.NewTestModeSign())
 	}
 	contents.Add(authentication.CanvasObject())
 	d := dialog.NewCustom("Account", "Cancel", contents, f.window)
@@ -606,7 +606,7 @@ func (f *bcFyne) ShowIdentity(identity bcgo.Identity) {
 	}
 	contents := container.NewVBox()
 	if !bcgo.IsLive() {
-		contents.Add(testModeSign())
+		contents.Add(ui.NewTestModeSign())
 	}
 	contents.Add(form)
 	dialog.ShowCustom("Identity", "OK", contents, f.window)
@@ -637,17 +637,4 @@ func identityView(identity bcgo.Identity) (fyne.CanvasObject, error) {
 			formatScroller,
 		),
 	), nil
-}
-
-func testModeSign() fyne.CanvasObject {
-	return container.NewPadded(&canvas.Text{
-		Alignment: fyne.TextAlignCenter,
-		Color:     theme.PrimaryColorNamed(theme.ColorRed),
-		Text:      "TEST MODE",
-		TextSize:  theme.TextSize(),
-		TextStyle: fyne.TextStyle{
-			Bold:      true,
-			Monospace: true,
-		},
-	})
 }
